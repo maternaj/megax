@@ -6,8 +6,9 @@ import argparse
 import json
 import logging
 import sys
-from datetime import datetime, time, timezone
-from typing import Any
+import time
+from datetime import datetime, time as dt_time, timezone
+from typing import Any, Callable
 
 from megax.config import load_config
 from megax.ingest import fetch_round_snapshot
@@ -15,8 +16,9 @@ from megax.poll import poll_once, poll_until_all_finished
 from megax.simulate import (
     SimulationConfig,
     format_simulation_report,
-    load_and_simulate,
+    simulate_round_record,
 )
+from megax.storage import load_round_record
 from megax.tipsport.client import TipsportClient
 from megax.tipsport.offer import MegaxMatch
 from megax.tipsport.results import MatchResult
@@ -38,8 +40,8 @@ def _parse_date(text: str) -> datetime:
 
 def _day_bounds(date_text: str) -> tuple[datetime, datetime]:
     day = _parse_date(date_text).date()
-    start = datetime.combine(day, time.min, tzinfo=timezone.utc)
-    end = datetime.combine(day, time.max, tzinfo=timezone.utc)
+    start = datetime.combine(day, dt_time.min, tzinfo=timezone.utc)
+    end = datetime.combine(day, dt_time.max, tzinfo=timezone.utc)
     return start, end
 
 
@@ -153,14 +155,70 @@ def cmd_poll_results(args: argparse.Namespace) -> int:
     return 0
 
 
+def _make_simulate_progress_reporter() -> tuple[Callable[[int, int], None], Callable[[], None]]:
+    """Return (progress callback, finish callback) writing status to stderr."""
+    start = time.monotonic()
+    last_pct = -1
+    is_tty = sys.stderr.isatty()
+
+    def report(done: int, total: int) -> None:
+        nonlocal last_pct
+        pct = int(done * 100 / total)
+        if pct == last_pct and done != total:
+            return
+        last_pct = pct
+        elapsed = time.monotonic() - start
+        msg = f"Simulating: {done:,}/{total:,} ({pct}%) — {elapsed:.1f}s"
+        if 0 < done < total:
+            eta = elapsed / done * (total - done)
+            msg += f", ~{eta:.0f}s left"
+        if is_tty:
+            print(f"\r{msg:<60}", end="", file=sys.stderr, flush=True)
+        elif done == total or pct in (25, 50, 75):
+            print(msg, file=sys.stderr, flush=True)
+
+    def finish() -> None:
+        elapsed = time.monotonic() - start
+        if is_tty:
+            print(file=sys.stderr)
+        print(f"Done in {elapsed:.1f}s", file=sys.stderr, flush=True)
+
+    return report, finish
+
+
 def cmd_simulate(args: argparse.Namespace) -> int:
+    record = load_round_record(args.round)
+    if record is None:
+        raise FileNotFoundError(f"Round snapshot not found: {args.round}")
+
     sim_config = SimulationConfig(
         universes=args.universes,
         field_size=args.field,
         crowd_players=args.crowd_players,
         seed=args.seed,
     )
-    result = load_and_simulate(args.round, sim_config=sim_config)
+    crowd_players = (
+        args.crowd_players
+        if args.crowd_players is not None
+        else min(args.field, 5_000)
+    )
+    if not args.quiet:
+        seed_text = str(args.seed) if args.seed is not None else "random"
+        print(
+            f"Round {args.round}: {len(record.matches)} matches | "
+            f"{sim_config.universes:,} universes | "
+            f"{crowd_players:,} crowd/universe | "
+            f"field {sim_config.field_size:,} | seed {seed_text}",
+            file=sys.stderr,
+            flush=True,
+        )
+        progress, finish = _make_simulate_progress_reporter()
+    else:
+        progress = None
+        finish = lambda: None
+
+    result = simulate_round_record(record, sim_config=sim_config, progress=progress)
+    finish()
     report = format_simulation_report(result)
     if args.output:
         with open(args.output, "w", encoding="utf-8") as fh:
@@ -202,6 +260,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Virtual crowd per universe (default min(field, 5000))",
     )
     simulate.add_argument("--seed", type=int, default=None)
+    simulate.add_argument("-q", "--quiet", action="store_true", help="Suppress progress on stderr")
     simulate.add_argument("-o", "--output")
     simulate.set_defaults(func=cmd_simulate)
 

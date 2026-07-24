@@ -36,6 +36,8 @@ megax simulate --round 2026-07-24_2026-07-27 \
   --universes 3000 --field 10000 -o /tmp/sim-report.txt
 ```
 
+Progress goes to **stderr** (so `-o` stays clean): setup line, then `Simulating: 2,500/5,000 (50%) — 12.3s, ~12s left`, then `Done in 24.5s`.
+
 ---
 
 ## Parameters
@@ -47,6 +49,7 @@ megax simulate --round 2026-07-24_2026-07-27 \
 | `--field` | 50 000 | Conceptual field size. Sets default crowd sample: `min(field, 5000)` if `--crowd-players` omitted. |
 | `--crowd-players` | `min(field, 5000)` | Virtual opponents sampled from **C** per universe. Not the full field — a random sample. |
 | `--seed` | random | Fixed seed for reproducible comparisons (same tips, different strategies). |
+| `--quiet` / `-q` | off | Suppress progress on stderr (report only). |
 
 ### Important nuances
 
@@ -72,7 +75,8 @@ For each universe (1 … N):
 
 | Agent | Description |
 |-------|-------------|
-| `pure_ev` | Best EV tip every match, no joker strategy |
+| `pure_ev` | Best EV tip every match, no joker |
+| `pure_ev_joker` | Same tips as `pure_ev`, joker on account A's match (fair EV baseline) |
 | `gpp` | Best GPP (utility) tip every match |
 | `optimizer_a` / `optimizer_b` | Lineup from `lineup.py` (chalk + leverage mix) |
 | `saved_a` / `saved_b` | Tips stored in snapshot (your GUI inputs) |
@@ -116,7 +120,7 @@ pure_ev            25.16   0.55%    8.20%   52.50%  100.00%
 
 1. GUI: fill money → Optimizer → **Vyplnit tipy A/B** → tweak if needed → **Uložit vstupy**
 2. `megax simulate --round … --universes 3000 --crowd-players 400 --seed 42`
-3. Compare `saved_a/b` vs `pure_ev` and vs each other
+3. Compare `saved_a/b` vs `pure_ev_joker` (apples-to-apples with joker) and vs each other
 4. Optional: change field size in GUI (10k vs 50k), save, re-run — see if leverage mix improves P(win)
 5. Submit tips to Chance manually
 

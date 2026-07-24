@@ -5,7 +5,10 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 from datetime import datetime
+from collections.abc import Callable
 from typing import TYPE_CHECKING
+
+ProgressCallback = Callable[[int, int], None]
 
 from megax.config import MegaxConfig, load_config
 from megax.crowd import CrowdMatrixResult, build_crowd_matrix
@@ -200,17 +203,22 @@ def build_default_agents(
     lineup: RoundLineup | None,
     state: RoundGuiState | None = None,
 ) -> tuple[AgentSpec, ...]:
+    ev_tips = {ctx.match_id: ctx.analysis.ev.best.score for ctx in contexts}
     agents: list[AgentSpec] = [
-        AgentSpec(
-            name="pure_ev",
-            tips={ctx.match_id: ctx.analysis.ev.best.score for ctx in contexts},
-        ),
+        AgentSpec(name="pure_ev", tips=ev_tips),
         AgentSpec(
             name="gpp",
             tips={ctx.match_id: ctx.analysis.gpp_best.score for ctx in contexts},
         ),
     ]
     if lineup is not None:
+        agents.append(
+            AgentSpec(
+                name="pure_ev_joker",
+                tips=ev_tips,
+                joker_match_id=lineup.account_a.joker_match_id,
+            )
+        )
         agents.append(
             AgentSpec(
                 name="optimizer_a",
@@ -250,6 +258,7 @@ def run_simulation(
     agents: tuple[AgentSpec, ...],
     *,
     sim_config: SimulationConfig | None = None,
+    progress: ProgressCallback | None = None,
 ) -> SimulationResult:
     if not contexts:
         raise ValueError("Cannot simulate without match contexts")
@@ -267,7 +276,8 @@ def run_simulation(
     top100: dict[str, float] = {agent.name: 0.0 for agent in agents}
     top1000: dict[str, float] = {agent.name: 0.0 for agent in agents}
 
-    for _ in range(cfg.universes):
+    progress_every = max(1, cfg.universes // 50)
+    for universe_idx in range(cfg.universes):
         outcomes = {
             ctx.match_id: sample_score(rng, ctx.probability.matrix)
             for ctx in contexts
@@ -303,6 +313,10 @@ def run_simulation(
             if rank >= 1.0 - (1000 / max(crowd_players, 1)):
                 top1000[agent.name] += 1.0
 
+        done = universe_idx + 1
+        if progress is not None and (done % progress_every == 0 or done == cfg.universes):
+            progress(done, cfg.universes)
+
     stats = tuple(
         AgentStats(
             name=agent.name,
@@ -332,6 +346,7 @@ def simulate_round_record(
     *,
     sim_config: SimulationConfig | None = None,
     include_saved_agents: bool = True,
+    progress: ProgressCallback | None = None,
 ) -> SimulationResult:
     cfg = sim_config or SimulationConfig(field_size=record.state.field_size)
     contexts = build_match_sim_contexts(record.matches, record.state)
@@ -343,7 +358,7 @@ def simulate_round_record(
         lineup=lineup,
         state=record.state if include_saved_agents else None,
     )
-    return run_simulation(contexts, agents, sim_config=cfg)
+    return run_simulation(contexts, agents, sim_config=cfg, progress=progress)
 
 
 def format_simulation_report(result: SimulationResult) -> str:
@@ -361,8 +376,13 @@ def format_simulation_report(result: SimulationResult) -> str:
     return "\n".join(lines)
 
 
-def load_and_simulate(round_key: str, *, sim_config: SimulationConfig | None = None) -> SimulationResult:
+def load_and_simulate(
+    round_key: str,
+    *,
+    sim_config: SimulationConfig | None = None,
+    progress: ProgressCallback | None = None,
+) -> SimulationResult:
     record = load_round_record(round_key)
     if record is None:
         raise FileNotFoundError(f"Round snapshot not found: {round_key}")
-    return simulate_round_record(record, sim_config=sim_config)
+    return simulate_round_record(record, sim_config=sim_config, progress=progress)
