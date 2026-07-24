@@ -1,0 +1,68 @@
+{
+  "match": {
+    "id": 7765938,
+    "resultParts": ["1", "2"],
+    "eventTables": [
+      {
+        "mySelectionId": "16-WINNER_3W-1",
+        "boxes": [
+          {
+            "cells": [
+              {
+                "id": 2567010869,
+                "name": "Home",
+                "winning": true,
+                "odd": 2.14,
+                "dateClosed": "2026-04-03T08:00:00.000+02:00"
+              },
+              {
+                "id": 2567010868,
+                "name": "Draw",
+                "winning": false,
+                "odd": 1.0,
+                "dateClosed": "2026-04-03T08:00:00.000+02:00"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "mySelectionId": "16-ASIAN_TOTAL-1",
+        "boxes": [
+          {
+            "cells": [
+              {
+                "id": 9001,
+                "name": "Více než 2.25 (2.0, 2.5)",
+                "winning": false,
+                "odd": 1.0
+              },
+              {
+                "id": 9002,
+                "name": "Méně než 2.25 (2.0, 2.5)",
+                "winning": false,
+                "odd": 1.0
+              }
+            ]
+          },
+          {
+            "cells": [
+              {
+                "id": 9003,
+                "name": "Více než 1.5",
+                "winning": false,
+                "odd": 1.82
+              },
+              {
+                "id": 9004,
+                "name": "Méně než 1.5",
+                "winning": false,
+                "odd": 1.95
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

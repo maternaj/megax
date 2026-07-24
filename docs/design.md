@@ -4,13 +4,17 @@ Analysis from initial brainstorm (2026-07). Czech source thread preserved in pro
 
 ## Problem statement
 
-Megatipovačka is a **large-field, free-to-play** exact-score competition. The objective is **not** to maximize expected points (EV) — that puts you in the top decile but sharing 1st place with hundreds of identical picks. The objective is to **maximize P(win the round)**, i.e. finish alone (or ahead on tie-breakers) at the top of a single 8-match slate.
+Megatipovačka is a **large-field, free-to-play** exact-score competition. The objective is **not** to maximize expected points (EV) — that puts you in the top decile but sharing 1st place with hundreds of identical picks. The objective is to **maximize P(win the round)**, i.e. finish alone (or ahead on tie-breakers) at the top of a single round slate.
+
+### Round size
+
+Czech top league has 16 teams → **usually 8 matches** per Megatipovačka kolo. Matches can be **postponed/rescheduled**; occasionally a **midweek inserted round** appears. Safe engineering cap: **≤10 matches** per round (never more in one tipovačka slate).
 
 We have:
 
 - A model that derives **P(x,y)** (exact score probabilities) from closing 1X2 and U/O 2.5 odds (0:0–9:9).
-- **Money distribution** on 1X2 from three sources (one sharp-friendly, two soft bookies).
-- U/O money distribution — source TBD.
+- **Money distribution** on **1X2 and U/O 2.5** from three bookmaker inputs: **Tipsport**, **Fortuna**, **Sazkabet** (manual or scraped — Tipsport REST offer API does not expose money %).
+- **Field size** estimate — how many players entered / expected for the round (feeds α in GPP utility).
 - **2 legal accounts** (not dozens).
 - **Optional joker** per round (point multiplier on one match).
 - **Late swap** — each match tip editable until kickoff; live round leaderboard available.
@@ -49,15 +53,22 @@ Estimate fraction of players tipping each exact score.
 
 Ticket count on 1X2 and U/O — direct measure of recreational behaviour.
 
-### Current input
+### Current input (GUI — three columns)
 
-Money % on 1X2 from **sharp** + **soft** bookies:
+Pre-match **money %** entered per match for:
+
+| Market | Tipsport | Fortuna | Sazkabet |
+|--------|----------|---------|----------|
+| 1X2 (1 / X / 2) | ✓ | ✓ | ✓ |
+| U/O 2.5 (Over / Under) | ✓ | ✓ | ✓ |
+
+Tipsport is the sharpest reference; Fortuna and Sazkabet skew recreational. Example use:
 
 ```
-Delta(1) = M_soft(1) - M_sharp(1)   # "dumb money" on home win
+Delta(1) = mean(M_fortuna(1), M_sazkabet(1)) - M_tipsport(1)
 ```
 
-Use sharp money as proxy for true probability; soft–sharp delta as public over/under bias.
+Blend or pick per bookie in crowd model tuning; v1 stores all three verbatim in round snapshots.
 
 ### Decomposition
 
@@ -72,7 +83,7 @@ C(x,y) = M(outcome) × D(x,y | outcome)
 
 Deform D dynamically: if crowd money is on Under 2.5, shift D toward 1:0, 2:0, 0:0; if Over, toward 2:1, 3:1, 3:2.
 
-Without U/O money, use static D templates — weaker for defensive/tactical matchups.
+Without U/O money, use static D templates — weaker for defensive/tactical matchups. With GUI inputs above, U/O crowd bias is first-class.
 
 ## GPP utility (single match)
 
@@ -92,7 +103,19 @@ JokerValue(match) = EV(best_tip) / C(best_tip)
 
 Place joker where leverage is highest, not necessarily on the biggest favourite.
 
-## Round-level optimization (8 matches)
+## Kickoff slots (parallel starts)
+
+Matches in a round do **not** start one-by-one. Several fixtures share the same kickoff time.
+
+```
+Round → KickoffSlot (kickoff_at) → Match[] (1..N parallel, N ≤ 10 total in round)
+```
+
+- All tips for a slot must be **fixed before that slot starts** (late swap boundary = slot, not individual match).
+- Joker on “earliest slot” may mean choosing among **multiple Friday 18:00 games** in parallel.
+- Optimizer and state machine advance **after each slot**, not after each match finishes.
+
+## Round-level optimization (≤10 matches)
 
 Each round is a **short slate** — high variance, large per-round prize.
 
@@ -114,12 +137,13 @@ Tickets should be **negatively correlated** — not two variants of the same cha
 
 ### Late swap state machine
 
-After each kickoff block:
+After each **kickoff slot** (when all parallel matches in that slot have started):
 
-1. Read live round points + leaderboard position (confirmed available).
-2. Compute **delta** to estimated leader score.
-3. **Small delta** → chalk remaining picks (block chasers).
-4. **Large delta** → raise α, contrarian / YOLO on remaining matches.
+1. Read **our live round points + rank** (GUI input or scrape from Chance leaderboard).
+2. Auto-score **finished** matches via Tipsport **results API** (`GET …/matches/{id}?fromResults=true` → `resultParts` FT score; same pattern as `deltax/settle/results_api.py`).
+3. Compute **delta** to estimated leader score.
+4. **Small delta** → chalk remaining picks (block chasers).
+5. **Large delta** → raise α, contrarian / YOLO on remaining matches.
 
 ## Monte Carlo evaluation
 
@@ -145,18 +169,60 @@ Use to calibrate α, chalk/contrarian ratio, joker policy.
 | 3 | **Fan bias** — local patriotism not in bookie money | Derby/home-team correction factor on C |
 | 4 | **Fanouškovská tipovačka conflict** — same tips for team vs solo leaderboard | Choose primary objective (solo round win) |
 | 5 | **Tie-breaker ambiguity** — "fewer submitted matches" may mean skip low-EV games | Verify with Chance support; defer in v1 |
-| 6 | **No U/O money yet** | Static D templates until source found |
+| 6 | **Money % not in Tipsport API** | Manual GUI entry from 3 bookmaker UIs; optional scrape later |
 | 7 | **Exact-score noise** — 93rd-minute goal turns 10 pts into 4 | Accept variance; 8-match slate is inherently lottery-heavy |
 | 8 | **Single-entry limit** (2 accounts) — can't cover all scenarios | Negative correlation + MC validation |
 
+## GUI (v1 scope)
+
+Local app (Streamlit or FastAPI + auto-refresh). **Display + recommendations only** — no auto-submit to Chance.
+
+### Time window
+
+- Default weekend **Pá–Po**; manual `date_from` / `date_to`.
+- Historical weekends: read-only frozen snapshots under `megax/data/`.
+
+### Match table (grouped by kickoff slot)
+
+Per match columns:
+
+| Column | Source |
+|--------|--------|
+| Fixture, kickoff | Tipsport comp 120 poll |
+| 1X2 + O/U 2.5 odds | Tipsport (`allEvents=true`, pick 2.5 line) |
+| Last odds refresh | timestamp |
+| Money % 1X2 + U/O | **Manual** — Tipsport / Fortuna / Sazkabet (6 numbers per book × 3 books) |
+| Model: EV tip, GPP tip, U-score | megax engine |
+| Account A / B tip, joker flag | optimizer output |
+| **Live points** (per account) | scoring rules × result when FT known |
+| Match status | pending / live / FT |
+
+### Round-level panels
+
+| Input | Purpose |
+|-------|---------|
+| **Field size** (hráči v kole / odhad) | α in `U(T) = EV/C^α`; MC calibration |
+| **Our rank + points** (průběžně) | late-swap state machine |
+| **Submitted tips** (A/B + joker) | running score vs crowd |
+
+### Live round scoring (automated)
+
+Poll results API for matches whose kickoff slot has passed. Parse FT from `resultParts`, apply `megax.scoring`, accumulate per-account totals. Show **průběžné vyhodnocení** — which finished games already scored 10/6/4/2/0 and running sum vs field estimate.
+
+Tipsport offer poll: ~60–120 s for odds; results poll: after slot kickoff until `match_has_results`.
+
 ## Implementation phases (proposed)
 
-1. **Core math** — scoring matrix, EV calculator, unit tests against rule examples.
-2. **Crowd model** — C(x,y) from 1X2 money + static D; plug-in for U/O later.
-3. **Single-round optimizer** — 8 picks + joker, utility function, two negatively correlated lineups.
-4. **Simulator** — MC backtest on historical odds if available.
-5. **Late swap** — state machine wired to live leaderboard input.
-6. **Data pipeline** — odds ingestion, closing-line scheduler, export format for manual tip entry.
+1. **Core math** — scoring, P(x,y) from 1X2+O/U 2.5, EV, unit tests. ✅
+2. **Tipsport ingest** — comp 120, O/U 2.5, kickoff slot grouping. ✅
+3. **GUI v1** — date range, slot-grouped table, live odds, money % inputs, field size, rank/points, snapshots, auto-refresh toggle. ✅
+4. **Crowd model** — C(x,y) from 1X2 money (Fortuna primary; Tipsport fallback). ✅
+5. **Results integration** — live FT scoring during round. ✅
+6. **Single-round optimizer** — two negatively correlated lineups + joker. ✅
+7. **Simulator** — MC backtest CLI (`megax simulate`). ✅
+8. **Late swap** — protect/chase state machine + GUI apply. ✅
+
+**v1.1:** partial refresh (results only). **v2 (Linear):** O/U money source, fan bias, Chance scrape, CS overlay, explicit O/U constraint in P fit.
 
 ## Data schema (sketch)
 
@@ -173,9 +239,21 @@ round:
         over_2_5: 1.85
         under_2_5: 1.95
       money:
-        sharp:  { home: 0.62, draw: 0.18, away: 0.20 }
-        soft_1: { home: 0.85, draw: 0.05, away: 0.10 }
-        soft_2: { home: 0.82, draw: 0.06, away: 0.12 }
+        tipsport:  { home: 0.62, draw: 0.18, away: 0.20, over_2_5: 0.48, under_2_5: 0.52 }
+        fortuna:   { home: 0.85, draw: 0.05, away: 0.10, over_2_5: 0.55, under_2_5: 0.45 }
+        sazkabet:  { home: 0.82, draw: 0.06, away: 0.12, over_2_5: 0.52, under_2_5: 0.48 }
+  field_size_estimate: 45000
+  our_accounts:
+    - id: A
+      rank: 1240
+      points: 18
+      joker_match_id: "sparta-teplice"
+      tips: { "sparta-teplice": "2:1", ... }
+    - id: B
+      rank: 890
+      points: 22
+      joker_match_id: null
+      tips: { ... }
       joker_eligible: true
 ```
 
