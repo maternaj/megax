@@ -154,6 +154,8 @@ After each **kickoff slot** (when all parallel matches in that slot have started
 
 Use to calibrate α, chalk/contrarian ratio, joker policy.
 
+**Usage:** see [`docs/simulate.md`](simulate.md).
+
 ## Operational playbook
 
 1. **Day 1 of competition:** submit any dummy tip immediately (tie-break timestamp).

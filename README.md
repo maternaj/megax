@@ -20,8 +20,8 @@ megax fetch-round --from-day 2026-07-25 --to-day 2026-07-27
 megax poll-results --match-id 8212280
 megax poll-results --match-id 8212280 --match-id 8212285 --watch
 
-# Monte Carlo from saved round snapshot (data/rounds/*.json)
-megax simulate --round 2026-07-24_2026-07-27 --universes 10000 --field 10000
+# Monte Carlo from saved round snapshot (see docs/simulate.md)
+megax simulate --round 2026-07-24_2026-07-27 --universes 3000 --field 10000 --crowd-players 400
 ```
 
 Session state is cached in `state/tipsport_scraper_state.json` (same init-web + cloudscraper pattern as deltax).
@@ -58,7 +58,7 @@ Round snapshots (tips + last-known odds, no odds history) persist under `data/ro
 | `crowd` | C(x,y) from Fortuna soft money + shape (γ, δ, Prelec, β blend) |
 | `utility` | GPP: U = EV / C^α |
 | `lineup` | Two-account chalk/leverage + joker |
-| `simulate` | Monte Carlo P(win) — CLI `megax simulate` |
+| `simulate` | Monte Carlo P(win) — CLI `megax simulate` — [`docs/simulate.md`](docs/simulate.md) |
 | `swap` | Late swap protect/chase — GUI panel + apply |
 
 **Next (v1.1):** partial refresh (results only, preserve form). **v2 (Linear backlog):** O/U money inputs, fan bias, Chance scrape, CS overlay.
