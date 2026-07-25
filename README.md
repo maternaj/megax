@@ -22,6 +22,9 @@ megax poll-results --match-id 8212280 --match-id 8212285 --watch
 
 # Monte Carlo from saved round snapshot (see docs/simulate.md)
 megax simulate --round 2026-07-24_2026-07-27 --universes 3000 --field 10000 --crowd-players 400
+
+# Calibrate GPP knobs before submit (QX-329)
+megax calibrate --round 2026-07-24_2026-07-27 --quick
 ```
 
 Session state is cached in `state/tipsport_scraper_state.json` (same init-web + cloudscraper pattern as deltax).

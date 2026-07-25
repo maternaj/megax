@@ -8,11 +8,17 @@ import logging
 import sys
 import time
 from datetime import datetime, time as dt_time, timezone
+from itertools import product
 from typing import Any, Callable
 
 from megax.config import load_config
 from megax.ingest import fetch_round_snapshot
 from megax.poll import poll_once, poll_until_all_finished
+from megax.calibrate import (
+    CalibrationKnobs,
+    format_calibration_report,
+    load_and_calibrate,
+)
 from megax.simulate import (
     SimulationConfig,
     format_simulation_report,
@@ -229,6 +235,87 @@ def cmd_simulate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _parse_float_list(text: str) -> tuple[float, ...]:
+    return tuple(float(part.strip()) for part in text.split(",") if part.strip())
+
+
+def _parse_int_list(text: str) -> tuple[int, ...]:
+    return tuple(int(part.strip()) for part in text.split(",") if part.strip())
+
+
+def cmd_calibrate(args: argparse.Namespace) -> int:
+    record = load_round_record(args.round)
+    if record is None:
+        raise FileNotFoundError(f"Round snapshot not found: {args.round}")
+
+    sim_config = SimulationConfig(
+        universes=args.universes,
+        field_size=args.field,
+        crowd_players=args.crowd_players,
+        seed=args.seed,
+    )
+    crowd_players = (
+        args.crowd_players
+        if args.crowd_players is not None
+        else min(args.field, 5_000)
+    )
+
+    grid: tuple[CalibrationKnobs, ...] | None = None
+    if args.ev_ratio or args.alpha_mult or args.leverage:
+        ev_ratios = _parse_float_list(args.ev_ratio) if args.ev_ratio else (0.85,)
+        alpha_mults = _parse_float_list(args.alpha_mult) if args.alpha_mult else (1.0,)
+        leverage_counts = _parse_int_list(args.leverage) if args.leverage else (2,)
+        grid = tuple(
+            CalibrationKnobs(
+                gpp_ev_ratio=ev_ratio,
+                alpha_multiplier=alpha_mult,
+                leverage_count=lev,
+            )
+            for ev_ratio, alpha_mult, lev in product(ev_ratios, alpha_mults, leverage_counts)
+        )
+
+    if not args.quiet:
+        grid_size = len(grid) if grid else ("quick" if args.quick else "full")
+        seed_text = str(args.seed) if args.seed is not None else "random"
+        print(
+            f"Calibrating {args.round}: {len(record.matches)} matches | "
+            f"grid={grid_size} | {sim_config.universes:,} universes/combo | "
+            f"{crowd_players:,} crowd | seed {seed_text}",
+            file=sys.stderr,
+            flush=True,
+        )
+        start = time.monotonic()
+
+        def progress(done: int, total: int, knobs: CalibrationKnobs) -> None:
+            elapsed = time.monotonic() - start
+            print(
+                f"  [{done}/{total}] {knobs.label} — {elapsed:.1f}s",
+                file=sys.stderr,
+                flush=True,
+            )
+    else:
+        progress = None
+
+    result = load_and_calibrate(
+        args.round,
+        sim_config=sim_config,
+        grid=grid,
+        quick=args.quick and grid is None,
+        progress=progress,
+    )
+    if not args.quiet and progress is not None:
+        print(f"Done in {time.monotonic() - start:.1f}s", file=sys.stderr, flush=True)
+
+    report = format_calibration_report(result)
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as fh:
+            fh.write(report)
+            fh.write("\n")
+    else:
+        print(report)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="megax", description="Megatipovačka data tools")
     parser.add_argument("--log-level", default="INFO")
@@ -264,6 +351,36 @@ def build_parser() -> argparse.ArgumentParser:
     simulate.add_argument("-o", "--output")
     simulate.set_defaults(func=cmd_simulate)
 
+    calibrate = sub.add_parser(
+        "calibrate",
+        help="Grid-search GPP knobs (α, leverage, EV floor) via simulate",
+    )
+    calibrate.add_argument("--round", required=True, help="Round key, e.g. 2026-07-24_2026-07-27")
+    calibrate.add_argument("--universes", type=int, default=1_500, help="Universes per grid point")
+    calibrate.add_argument("--field", type=int, default=None, help="Field size (default from snapshot)")
+    calibrate.add_argument("--crowd-players", type=int, default=None)
+    calibrate.add_argument("--seed", type=int, default=42)
+    calibrate.add_argument(
+        "--quick",
+        action="store_true",
+        help="Smaller default grid (27 combos vs 100)",
+    )
+    calibrate.add_argument(
+        "--ev-ratio",
+        help="Comma-separated gpp_ev_ratio values, e.g. 0.85,0.95,1.0",
+    )
+    calibrate.add_argument(
+        "--alpha-mult",
+        help="Comma-separated α multipliers on field-size alpha, e.g. 0.85,1.0,1.15",
+    )
+    calibrate.add_argument(
+        "--leverage",
+        help="Comma-separated leverage counts, e.g. 0,1,2,3",
+    )
+    calibrate.add_argument("-q", "--quiet", action="store_true")
+    calibrate.add_argument("-o", "--output")
+    calibrate.set_defaults(func=cmd_calibrate)
+
     return parser
 
 
@@ -277,6 +394,12 @@ def main(argv: list[str] | None = None) -> int:
         has_dt = args.from_date and args.to_date
         if not has_day and not has_dt:
             parser.error("fetch-round requires --from-date/--to-date or --from-day/--to-day")
+
+    if args.command == "calibrate" and args.field is None:
+        record = load_round_record(args.round)
+        if record is None:
+            parser.error(f"Round snapshot not found: {args.round}")
+        args.field = record.state.field_size
 
     return args.func(args)
 

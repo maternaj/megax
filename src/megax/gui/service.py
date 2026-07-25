@@ -15,6 +15,7 @@ from megax.scoring import points
 from megax.storage import RoundRecord, load_round_record, save_round_record
 from megax.tipsport.client import TipsportClient
 from megax.tipsport.offer import MegaxMatch, group_by_kickoff_slot
+from megax.calibrate import build_lineup_for_knobs, knobs_from_snapshot
 from megax.lineup import MatchLineupContext, RoundLineup, build_round_lineup
 from megax.swap import SwapRecommendation, compute_swap_recommendation
 from megax.tipsport.results import MatchResult, MatchStatus
@@ -213,7 +214,15 @@ def build_round_view(
 
     lineup = None
     if lineup_contexts and len(lineup_contexts) == len(snapshot.matches):
-        lineup = build_round_lineup(tuple(lineup_contexts))
+        if state.calibration is not None:
+            lineup = build_lineup_for_knobs(
+                snapshot.matches,
+                state,
+                knobs_from_snapshot(state.calibration),
+                config=config,
+            )
+        if lineup is None:
+            lineup = build_round_lineup(tuple(lineup_contexts))
 
     swap = None
     if not read_only and lineup_contexts and len(lineup_contexts) == len(snapshot.matches):

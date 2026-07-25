@@ -6,7 +6,7 @@ from datetime import datetime
 from html import escape
 from zoneinfo import ZoneInfo
 
-from megax.gui.matrices import render_matrix_table
+from megax.gui.matrices import build_ev_grid, build_utility_grid, render_matrix_table
 from megax.gui.service import MatchRow, RoundView
 from megax.gui.state import BOOKMAKERS, MONEY_KEY_LABELS, MONEY_KEYS, RoundGuiState
 from megax.tipsport.results import MatchStatus
@@ -262,6 +262,7 @@ def render_page(view: RoundView, *, message: str | None = None) -> str:
     .mx-table th, .mx-table td {{ border: 1px solid var(--line); text-align: center; padding: .2rem; }}
     .mx-table th {{ color: var(--muted); background: #0d1218; }}
     .mx-legend {{ color: var(--muted); font-size: .72rem; margin-top: .35rem; }}
+    .mx-extra {{ color: var(--accent); font-size: .68rem; white-space: nowrap; }}
   </style>
 </head>
 <body>
@@ -337,6 +338,7 @@ def render_page(view: RoundView, *, message: str | None = None) -> str:
         <section class="panel">
           <h3>Optimizer</h3>
           {_render_lineup_panel(view, read_only=view.read_only)}
+          {_render_calibration_panel(view, read_only=view.read_only)}
           <div class="toolbar">
             <button type="submit">Uložit vstupy</button>
             <button type="submit" formaction="/refresh" class="secondary">Obnovit kurzy + výsledky</button>
@@ -390,6 +392,15 @@ def _render_account_lineup(view: RoundView, account) -> str:
 def _render_swap_panel(view: RoundView, *, read_only: bool) -> str:
     swap = view.swap
     if swap is None:
+        from datetime import datetime, timezone
+
+        now = datetime.now(timezone.utc)
+        if view.snapshot.slots and all(slot.kickoff_at > now for slot in view.snapshot.slots):
+            return (
+                '<p class="meta">Late swap — aktivní až <strong>po startu prvního slotu</strong> '
+                "(když už znáte průběžné body z Chance). Před tipováním použijte "
+                "<strong>Kalibraci</strong> nebo Optimizer, ne late swap.</p>"
+            )
         return '<p class="meta">Late swap — všechny sloty už začaly, nebo chybí P + C u zápasů.</p>'
 
     mode_labels = {
@@ -431,13 +442,72 @@ def _render_swap_panel(view: RoundView, *, read_only: bool) -> str:
     return header + table + button
 
 
+def _render_calibration_panel(view: RoundView, *, read_only: bool) -> str:
+    cal = view.state.calibration
+    if cal is None and read_only:
+        return ""
+
+    parts = ['<div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--line);">']
+    parts.append('<h4 style="margin:0 0 .5rem;font-size:.9rem;">Kalibrace (QX-329)</h4>')
+
+    if cal is None:
+        parts.append(
+            '<p class="meta">Grid-search α / leverage / EV floor přes simulate (~4s). '
+            "Vyplní tipy A/B optimálními knoby pro toto kolo.</p>"
+        )
+    else:
+        chalk = (
+            '<span style="color:var(--warn);"> · chalk mode</span>'
+            if cal.use_chalk_mode
+            else ""
+        )
+        parts.append(
+            f'<p class="meta">Poslední: <strong>{escape(cal.label)}</strong>{chalk}<br>'
+            f"P(win) A/B {cal.p_win_a:.2%} / {cal.p_win_b:.2%} · "
+            f"joker {cal.p_win_pure_ev_joker:.2%} · "
+            f"{cal.universes:,} universes · {cal.grid_size} platných kombinací<br>"
+            f"α={cal.alpha_used:.3f} · {_fmt_dt_iso(cal.calibrated_at)}</p>"
+        )
+
+    if not read_only:
+        parts.append(
+            '<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem;">'
+            '<button type="submit" formaction="/calibrate-and-apply" class="secondary">'
+            "Kalibrovat + vyplnit tipy</button>"
+        )
+        if cal is not None:
+            parts.append(
+                '<button type="submit" formaction="/apply-calibrated-lineup" class="secondary">'
+                "Znovu aplikovat uložené knoby</button>"
+            )
+        parts.append("</div>")
+
+    parts.append("</div>")
+    return "".join(parts)
+
+
+def _fmt_dt_iso(iso_text: str) -> str:
+    try:
+        from datetime import datetime
+
+        dt = datetime.fromisoformat(iso_text.replace("Z", "+00:00"))
+        return _fmt_dt(dt)
+    except ValueError:
+        return iso_text
+
+
 def _render_lineup_panel(view: RoundView, *, read_only: bool) -> str:
     if view.lineup is None:
         return '<p class="meta">Lineup — potřeba P + C u všech zápasů (kurzy + peníze %).</p>'
 
     lineup = view.lineup
+    preview_note = ""
+    if view.state.calibration is not None:
+        preview_note = (
+            f'<p class="meta">Náhled line-upu: kalibrované knoby ({escape(view.state.calibration.label)}).</p>'
+        )
     parts = [
-        '<p class="meta">Mix chalk (EV) + leverage (GPP). Účty jsou vědomě nekorelované.</p>',
+        preview_note or '<p class="meta">Mix chalk (EV) + leverage (GPP). Účty jsou vědomě nekorelované.</p>',
         _render_account_lineup(view, lineup.account_a),
         _render_account_lineup(view, lineup.account_b),
         f'<div class="meta">Leverage zápasy: {len(lineup.leverage_match_ids)}</div>',
@@ -620,7 +690,15 @@ def _render_match_matrices(row: MatchRow) -> str:
         f"linek {prob.team_estimate.home_lines_used}+{prob.team_estimate.away_lines_used}"
         f"{total_note} · ρ={prob.low_score_rho:.2f}"
     )
-    p_html = render_matrix_table(prob.matrix, title="P(x,y) — model pravděpodobnosti", subtitle=p_sub)
+    p_html = render_matrix_table(
+        prob.matrix,
+        title="P(x,y) — model pravděpodobnosti",
+        subtitle=p_sub,
+        extra_values=build_ev_grid(prob.matrix),
+        extra_label="EV",
+        extra_decimals=2,
+        legend_suffix="EV = očekávané body tipu",
+    )
     if row.crowd is None:
         c_html = '<div class="mx-wrap"><div class="meta">C(x,y) — crowd model nedostupný</div></div>'
     else:
@@ -637,10 +715,21 @@ def _render_match_matrices(row: MatchRow) -> str:
             f"{mass[0] * 100:.0f}/{mass[1] * 100:.0f}/{mass[2] * 100:.0f}"
             f"{raw_note}"
         )
+        u_grid = None
+        if row.analysis is not None:
+            u_grid = build_utility_grid(
+                prob.matrix,
+                crowd.matrix,
+                alpha=row.analysis.gpp_alpha,
+            )
         c_html = render_matrix_table(
             crowd.matrix,
             title="C(x,y) — odhad tipů davu",
             subtitle=c_sub,
+            extra_values=u_grid,
+            extra_label="U",
+            extra_decimals=1,
+            legend_suffix="U = EV / C^α" if u_grid is not None else "",
         )
     return f"""
     <tr class="mx-row">

@@ -54,6 +54,7 @@ Progress goes to **stderr** (so `-o` stays clean): setup line, then `Simulating:
 ### Important nuances
 
 - **GPP α and optimizer** use `field_size` from the **saved snapshot** (GUI “Velikost pole”), not necessarily `--field` on CLI. Change field size in GUI → save → re-run simulate.
+- **`optimizer_*`** uses knobs from the last GUI **Kalibrace** when present (`ev`, `α×`, `lev` shown in the tips section). Without calibration, default leverage applies.
 - **`--crowd-players`** is a **sample** of the crowd, not all 10 000 players. Lower values → **optimistic** P(win). Use 300–500 for speed, 2000–5000 for pessimistic estimates.
 - P(win) from simulate is **not** your exact Chance win probability — it ranks strategies relative to each other.
 
@@ -78,10 +79,13 @@ For each universe (1 … N):
 | `pure_ev` | Best EV tip every match, no joker |
 | `pure_ev_joker` | Same tips as `pure_ev`, joker on account A's match (fair EV baseline) |
 | `gpp` | Best GPP (utility) tip every match |
-| `optimizer_a` / `optimizer_b` | Lineup from `lineup.py` (chalk + leverage mix) |
+| `optimizer_a` / `optimizer_b` | Lineup from `lineup.py` using **calibrated knobs** when the round has a calibration snapshot; otherwise default knobs |
 | `saved_a` / `saved_b` | Tips stored in snapshot (your GUI inputs) |
 
-If `saved_*` equals `optimizer_*`, your tips match the optimizer.
+If `saved_*` equals `optimizer_*`, your stored tips match the calibrated (or default) optimizer.  
+If they differ, you edited tips after calibrate-and-apply or have not applied calibration yet.
+
+The report ends with **Tips by agent** — kickoff order, joker match, and per-match scores for every agent.
 
 ---
 
@@ -126,6 +130,32 @@ pure_ev            25.16   0.55%    8.20%   52.50%  100.00%
 
 ---
 
+## Calibration (`megax calibrate`) — QX-329
+
+Grid-search **GPP knobs** before submit. Uses fast simulate per combo.
+
+```bash
+# Quick grid (~27 combos, ~30s)
+megax calibrate --round 2026-07-24_2026-07-27 --quick
+
+# Full grid (~100 combos, ~2 min)
+megax calibrate --round 2026-07-24_2026-07-27 --universes 1500 --crowd-players 400
+
+# Custom slice
+megax calibrate --round 2026-07-24_2026-07-27 \
+  --ev-ratio 0.90,1.0 --alpha-mult 0.85,1.0 --leverage 0,1,2
+```
+
+**Searches:** `gpp_ev_ratio` (EV floor), `alpha_multiplier` (on field-size α), `leverage_count` (0 = all chalk).
+
+**Output:** recommended knobs, lift vs current defaults, top-10 table, chalk-mode warning when `pure_ev_joker` beats optimizer.
+
+**Note on O/U money (QX-322):** betting handle often skews Over; Megatipovačka crowd may favour 1:0 / 2:0 / 2:1 on favourites (mostly Under). Until O/U money is filled (~1h pre-kickoff), C tail may be off — calibration flags chalk mode when leverage loses to `pure_ev_joker`.
+
+**GUI:** Optimizer panel → **Kalibrovat + vyplnit tipy** (~4s). Knobs + P(win) stats persist in the round snapshot; lineup preview uses calibrated settings. **Znovu aplikovat uložené knoby** re-fills A/B after money % updates without re-running simulate.
+
+---
+
 ## Terminology (GUI columns)
 
 | Term | Meaning |
@@ -144,6 +174,7 @@ pure_ev            25.16   0.55%    8.20%   52.50%  100.00%
 - Crowd capped at 5000 players/universe for speed
 - No tie-break timestamp rules from Chance
 - Uses snapshot odds/money at save time — not live closing line unless you refresh + save first
+- Vectorized engine (numpy): typical 2k universes × 400 crowd ≈ **1s** on a laptop (was ~2 min in v1 loop)
 
 ---
 

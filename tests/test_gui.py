@@ -51,6 +51,111 @@ def mock_round(monkeypatch):
         yield snapshot, match
 
 
+def test_calibrate_and_apply_endpoint_persists_round(mock_round, tmp_path, monkeypatch) -> None:
+    snapshot, match = mock_round
+    monkeypatch.setattr("megax.storage.rounds_data_dir", lambda: tmp_path)
+    app = create_app()
+    client = TestClient(app)
+    money = {
+        f"money_{match.match_id}_tipsport_home": "70",
+        f"money_{match.match_id}_tipsport_draw": "15",
+        f"money_{match.match_id}_tipsport_away": "15",
+        f"money_{match.match_id}_fortuna_home": "75",
+        f"money_{match.match_id}_fortuna_draw": "10",
+        f"money_{match.match_id}_fortuna_away": "15",
+        f"money_{match.match_id}_sazkabet_home": "72",
+        f"money_{match.match_id}_sazkabet_draw": "12",
+        f"money_{match.match_id}_sazkabet_away": "16",
+    }
+    response = client.post(
+        "/calibrate-and-apply",
+        data={
+            "from_day": "2026-04-05",
+            "to_day": "2026-04-06",
+            "field_size": "50000",
+            **money,
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "calibrated=1" in response.headers["location"]
+    key = round_key(snapshot.date_from, snapshot.date_to)
+    record = load_round_record(key)
+    assert record is not None
+    assert record.state.calibration is not None
+    assert isinstance(record.state.calibration.use_chalk_mode, bool)
+
+
+def test_calibrate_and_apply_endpoint(mock_round, tmp_path, monkeypatch) -> None:
+    from megax.calibrate import CalibrationKnobs, CalibrationResult, CalibrationRow
+
+    snapshot, match = mock_round
+    monkeypatch.setattr("megax.storage.rounds_data_dir", lambda: tmp_path)
+    monkeypatch.setattr("megax.gui.app.load_and_calibrate", lambda *args, **kwargs: CalibrationResult(
+        round_key="test",
+        match_count=1,
+        universes=100,
+        crowd_players=30,
+        field_size=5000,
+        rows=(
+            CalibrationRow(
+                knobs=CalibrationKnobs(0.85, 1.0, 0),
+                alpha_used=0.96,
+                p_win_a=0.03,
+                p_win_b=0.01,
+                p_win_pure_ev_joker=0.03,
+                mean_pts_a=28.0,
+                mean_pts_b=26.0,
+                beats_baseline=True,
+            ),
+        ),
+        best=CalibrationRow(
+            knobs=CalibrationKnobs(0.85, 1.0, 0),
+            alpha_used=0.96,
+            p_win_a=0.03,
+            p_win_b=0.01,
+            p_win_pure_ev_joker=0.03,
+            mean_pts_a=28.0,
+            mean_pts_b=26.0,
+            beats_baseline=True,
+        ),
+        baseline_row=None,
+        use_chalk_mode=True,
+    ))
+
+    app = create_app()
+    client = TestClient(app)
+    money = {
+        f"money_{match.match_id}_tipsport_home": "70",
+        f"money_{match.match_id}_tipsport_draw": "15",
+        f"money_{match.match_id}_tipsport_away": "15",
+        f"money_{match.match_id}_fortuna_home": "75",
+        f"money_{match.match_id}_fortuna_draw": "10",
+        f"money_{match.match_id}_fortuna_away": "15",
+        f"money_{match.match_id}_sazkabet_home": "72",
+        f"money_{match.match_id}_sazkabet_draw": "12",
+        f"money_{match.match_id}_sazkabet_away": "16",
+    }
+    response = client.post(
+        "/calibrate-and-apply",
+        data={
+            "from_day": "2026-04-05",
+            "to_day": "2026-04-06",
+            "field_size": "50000",
+            **money,
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "calibrated=1" in response.headers["location"]
+    key = round_key(snapshot.date_from, snapshot.date_to)
+    record = load_round_record(key)
+    assert record is not None
+    assert record.state.calibration is not None
+    assert record.state.calibration.leverage_count == 0
+    assert record.state.accounts["A"].tips
+
+
 def test_home_renders(mock_round) -> None:
     snapshot, match = mock_round
     app = create_app()
@@ -65,6 +170,7 @@ def test_home_renders(mock_round) -> None:
     assert "Auto-refresh" in body
     assert 'id="auto_refresh"' in body
     assert "Vyplnit tipy A/B" in body
+    assert "Kalibrovat + vyplnit tipy" in body
     assert "P(x,y)" in body
 
 

@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 ProgressCallback = Callable[[int, int], None]
 
 from megax.config import MegaxConfig, load_config
+from megax.simulate_engine import prepare_simulation, run_simulation_vectorized
 from megax.crowd import CrowdMatrixResult, build_crowd_matrix
 from megax.ev import parse_tip
 from megax.lineup import MatchLineupContext, RoundLineup, build_round_lineup
@@ -30,6 +31,7 @@ class SimulationConfig:
     field_size: int = 50_000
     crowd_players: int | None = None
     seed: int | None = None
+    universe_chunk: int | None = None
 
 
 @dataclass(frozen=True)
@@ -63,6 +65,8 @@ class AgentStats:
     p_top_10: float
     p_top_100: float
     p_top_1000: float
+    tips: dict[int, str]
+    joker_match_id: int | None = None
 
 
 @dataclass(frozen=True)
@@ -71,6 +75,8 @@ class SimulationResult:
     crowd_players: int
     field_size: int
     agents: tuple[AgentStats, ...]
+    matches: tuple[MegaxMatch, ...] = ()
+    optimizer_note: str | None = None
 
 
 def build_match_sim_contexts(
@@ -78,11 +84,13 @@ def build_match_sim_contexts(
     state: RoundGuiState,
     *,
     config: MegaxConfig | None = None,
+    gpp_alpha_override: float | None = None,
     gpp_ev_ratio: float | None = None,
     alpha_boost: float = 0.0,
 ) -> tuple[MatchSimContext, ...]:
     """Build per-match P/C contexts from saved matches + GUI state."""
     cfg = config or load_config()
+    gpp_alpha = gpp_alpha_override if gpp_alpha_override is not None else cfg.gpp_alpha
     contexts: list[MatchSimContext] = []
     for match in matches:
         prob = build_score_matrix_from_match(match)
@@ -101,7 +109,7 @@ def build_match_sim_contexts(
             prob,
             crowd,
             field_size=state.field_size,
-            gpp_alpha=cfg.gpp_alpha,
+            gpp_alpha=gpp_alpha,
             gpp_ev_ratio=gpp_ev_ratio,
             alpha_boost=alpha_boost,
         )
@@ -178,24 +186,6 @@ def score_round(
     return total
 
 
-def _win_share(agent_score: int, crowd_scores: list[int]) -> float:
-    if not crowd_scores:
-        return 1.0 if agent_score > 0 else 0.0
-    best = max(crowd_scores)
-    if agent_score > best:
-        return 1.0
-    if agent_score < best:
-        return 0.0
-    tied = sum(1 for score in crowd_scores if score == best) + 1
-    return 1.0 / tied
-
-
-def _percentile_rank(agent_score: int, crowd_scores: list[int]) -> float:
-    if not crowd_scores:
-        return 1.0
-    better = sum(1 for score in crowd_scores if score > agent_score)
-    return 1.0 - (better / len(crowd_scores))
-
 
 def build_default_agents(
     contexts: tuple[MatchSimContext, ...],
@@ -253,6 +243,35 @@ def build_default_agents(
     return tuple(agents)
 
 
+def build_optimizer_lineup(
+    matches: tuple[MegaxMatch, ...],
+    state: RoundGuiState,
+    *,
+    contexts: tuple[MatchSimContext, ...] | None = None,
+) -> tuple[RoundLineup, str]:
+    """Build optimizer lineup; prefer calibrated knobs when stored on the round."""
+    from megax.calibrate import build_lineup_for_knobs, knobs_from_snapshot
+
+    if state.calibration is not None:
+        lineup = build_lineup_for_knobs(
+            matches,
+            state,
+            knobs_from_snapshot(state.calibration),
+        )
+        if lineup is not None:
+            cal = state.calibration
+            note = (
+                f"calibrated ev={cal.gpp_ev_ratio:.2f} "
+                f"α×{cal.alpha_multiplier:.2f} lev={cal.leverage_count}"
+            )
+            return lineup, note
+
+    if contexts is None:
+        contexts = build_match_sim_contexts(matches, state)
+    lineup = build_round_lineup(tuple(ctx.as_lineup_context() for ctx in contexts))
+    return lineup, "default knobs"
+
+
 def run_simulation(
     contexts: tuple[MatchSimContext, ...],
     agents: tuple[AgentSpec, ...],
@@ -266,79 +285,48 @@ def run_simulation(
         raise ValueError("Cannot simulate without agents")
 
     cfg = sim_config or SimulationConfig()
-    rng = random.Random(cfg.seed)
-    match_ids = tuple(ctx.match_id for ctx in contexts)
-    crowd_players = cfg.crowd_players if cfg.crowd_players is not None else min(cfg.field_size, 5_000)
-
-    totals: dict[str, list[int]] = {agent.name: [] for agent in agents}
-    wins: dict[str, float] = {agent.name: 0.0 for agent in agents}
-    top10: dict[str, float] = {agent.name: 0.0 for agent in agents}
-    top100: dict[str, float] = {agent.name: 0.0 for agent in agents}
-    top1000: dict[str, float] = {agent.name: 0.0 for agent in agents}
-
-    progress_every = max(1, cfg.universes // 50)
-    for universe_idx in range(cfg.universes):
-        outcomes = {
-            ctx.match_id: sample_score(rng, ctx.probability.matrix)
-            for ctx in contexts
-        }
-        crowd_scores: list[int] = []
-        for _player in range(crowd_players):
-            crowd_tips = {
-                ctx.match_id: _sample_tip_from_crowd(rng, ctx.crowd.matrix)
-                for ctx in contexts
-            }
-            crowd_scores.append(
-                score_round(
-                    tips=crowd_tips,
-                    outcomes=outcomes,
-                    match_ids=match_ids,
-                )
-            )
-
-        for agent in agents:
-            agent_score = score_round(
-                tips=agent.tips,
-                outcomes=outcomes,
-                match_ids=match_ids,
-                joker_match_id=agent.joker_match_id,
-            )
-            totals[agent.name].append(agent_score)
-            wins[agent.name] += _win_share(agent_score, crowd_scores)
-            rank = _percentile_rank(agent_score, crowd_scores)
-            if rank >= 1.0 - (10 / max(crowd_players, 1)):
-                top10[agent.name] += 1.0
-            if rank >= 1.0 - (100 / max(crowd_players, 1)):
-                top100[agent.name] += 1.0
-            if rank >= 1.0 - (1000 / max(crowd_players, 1)):
-                top1000[agent.name] += 1.0
-
-        done = universe_idx + 1
-        if progress is not None and (done % progress_every == 0 or done == cfg.universes):
-            progress(done, cfg.universes)
-
+    crowd_players = (
+        cfg.crowd_players
+        if cfg.crowd_players is not None
+        else min(cfg.field_size, 5_000)
+    )
+    prepared = prepare_simulation(
+        p_matrices=tuple(ctx.probability.matrix for ctx in contexts),
+        c_matrices=tuple(ctx.crowd.matrix for ctx in contexts),
+        match_ids=tuple(ctx.match_id for ctx in contexts),
+        agent_names=tuple(agent.name for agent in agents),
+        agent_tips=tuple(agent.tips for agent in agents),
+        agent_jokers=tuple(agent.joker_match_id for agent in agents),
+    )
+    vectorized = run_simulation_vectorized(
+        prepared,
+        universes=cfg.universes,
+        field_size=cfg.field_size,
+        crowd_players=crowd_players,
+        seed=cfg.seed,
+        progress=progress,
+        universe_chunk=cfg.universe_chunk,
+    )
     stats = tuple(
         AgentStats(
-            name=agent.name,
-            mean_points=sum(totals[agent.name]) / cfg.universes,
-            p_win=wins[agent.name] / cfg.universes,
-            p_top_10=top10[agent.name] / cfg.universes,
-            p_top_100=top100[agent.name] / cfg.universes,
-            p_top_1000=top1000[agent.name] / cfg.universes,
+            name=vec.name,
+            mean_points=vec.mean_points,
+            p_win=vec.p_win,
+            p_top_10=vec.p_top_10,
+            p_top_100=vec.p_top_100,
+            p_top_1000=vec.p_top_1000,
+            tips=dict(spec.tips),
+            joker_match_id=spec.joker_match_id,
         )
-        for agent in agents
+        for vec, spec in zip(vectorized.agents, agents, strict=True)
     )
     return SimulationResult(
-        universes=cfg.universes,
-        crowd_players=crowd_players,
-        field_size=cfg.field_size,
+        universes=vectorized.universes,
+        crowd_players=vectorized.crowd_players,
+        field_size=vectorized.field_size,
         agents=stats,
     )
 
-
-def _sample_tip_from_crowd(rng: random.Random, matrix: tuple[tuple[float, ...], ...]) -> str:
-    home, away = sample_score(rng, matrix)
-    return f"{home}:{away}"
 
 
 def simulate_round_record(
@@ -352,13 +340,58 @@ def simulate_round_record(
     contexts = build_match_sim_contexts(record.matches, record.state)
     if len(contexts) != len(record.matches):
         raise ValueError("Missing probability/crowd data for one or more matches")
-    lineup = build_round_lineup(tuple(ctx.as_lineup_context() for ctx in contexts))
+    lineup, optimizer_note = build_optimizer_lineup(
+        record.matches,
+        record.state,
+        contexts=contexts,
+    )
     agents = build_default_agents(
         contexts,
         lineup=lineup,
         state=record.state if include_saved_agents else None,
     )
-    return run_simulation(contexts, agents, sim_config=cfg, progress=progress)
+    result = run_simulation(contexts, agents, sim_config=cfg, progress=progress)
+    return SimulationResult(
+        universes=result.universes,
+        crowd_players=result.crowd_players,
+        field_size=result.field_size,
+        agents=result.agents,
+        matches=record.matches,
+        optimizer_note=optimizer_note,
+    )
+
+
+def _sorted_matches(matches: tuple[MegaxMatch, ...]) -> tuple[MegaxMatch, ...]:
+    return tuple(sorted(matches, key=lambda match: (match.kickoff_at, match.match_id)))
+
+
+def _match_short_label(match: MegaxMatch, *, width: int = 30) -> str:
+    label = match.name.replace(" - ", "–") if match.name else f"{match.home}–{match.away}"
+    if len(label) > width:
+        return label[: width - 1] + "…"
+    return label
+
+
+def _format_agent_tips_section(
+    agent: AgentStats,
+    matches: tuple[MegaxMatch, ...],
+    *,
+    optimizer_note: str | None = None,
+) -> list[str]:
+    lines: list[str] = [agent.name]
+    meta: list[str] = []
+    if agent.joker_match_id is not None:
+        joker = next((m for m in matches if m.match_id == agent.joker_match_id), None)
+        joker_label = _match_short_label(joker) if joker else str(agent.joker_match_id)
+        meta.append(f"joker {joker_label}")
+    if agent.name.startswith("optimizer") and optimizer_note:
+        meta.append(optimizer_note)
+    if meta:
+        lines[0] = f"{agent.name} ({', '.join(meta)})"
+    for match in _sorted_matches(matches):
+        tip = agent.tips.get(match.match_id, "—")
+        lines.append(f"  {_match_short_label(match):<{30}} {tip:>5}")
+    return lines
 
 
 def format_simulation_report(result: SimulationResult) -> str:
@@ -373,6 +406,18 @@ def format_simulation_report(result: SimulationResult) -> str:
             f"{agent.name:<14} {agent.mean_points:>9.2f} {agent.p_win:>7.2%} "
             f"{agent.p_top_10:>7.2%} {agent.p_top_100:>8.2%} {agent.p_top_1000:>8.2%}"
         )
+
+    if result.matches:
+        lines.extend(["", "Tips by agent", "=" * 62])
+        for agent in result.agents:
+            lines.append("")
+            lines.extend(
+                _format_agent_tips_section(
+                    agent,
+                    result.matches,
+                    optimizer_note=result.optimizer_note,
+                )
+            )
     return "\n".join(lines)
 
 

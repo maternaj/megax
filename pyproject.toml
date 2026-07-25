@@ -9,6 +9,7 @@ description = "Megatipovačka lineup optimizer — EV, crowd leverage, Monte Car
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "numpy>=2.0",
     "cloudscraper25>=2.7.0",
     "fake-useragent>=2.0.0",
     "fastapi>=0.115.0",

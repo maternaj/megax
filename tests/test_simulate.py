@@ -15,9 +15,11 @@ from megax.simulate import (
     build_default_agents,
     build_lineup_contexts,
     build_match_sim_contexts,
+    format_simulation_report,
     run_simulation,
     sample_score,
     score_round,
+    simulate_round_record,
 )
 from megax.storage import RoundRecord, save_round_record
 
@@ -126,8 +128,117 @@ def test_build_default_agents_includes_pure_ev_joker_with_lineup() -> None:
     assert by_name["pure_ev"].joker_match_id is None
 
 
+def test_points_lut_matches_scoring_rules() -> None:
+    from megax.simulate_engine import build_points_lut, flat_index
+    from megax.scoring import points
+
+    lut = build_points_lut()
+    for tip_home in range(3):
+        for tip_away in range(3):
+            for actual_home in range(3):
+                for actual_away in range(3):
+                    tip_flat = flat_index(tip_home, tip_away)
+                    actual_flat = flat_index(actual_home, actual_away)
+                    assert lut[tip_flat, actual_flat] == points(
+                        tip_home, tip_away, actual_home, actual_away
+                    )
+
+
+def test_vectorized_scoring_matches_score_round() -> None:
+    from megax.simulate_engine import build_points_lut, flat_index
+
+    lut = build_points_lut()
+    tips = {1: "2:1", 2: "1:0", 3: "0:2"}
+    outcomes = {1: (2, 1), 2: (1, 1), 3: (0, 2)}
+    match_ids = (1, 2, 3)
+    expected = score_round(
+        tips=tips,
+        outcomes=outcomes,
+        match_ids=match_ids,
+        joker_match_id=1,
+    )
+
+    tip_flats = []
+    joker_mult = []
+    actual_flats = []
+    for match_id in match_ids:
+        parsed = __import__("megax.ev", fromlist=["parse_tip"]).parse_tip(tips[match_id])
+        assert parsed is not None
+        tip_flats.append(flat_index(parsed[0], parsed[1]))
+        joker_mult.append(2 if match_id == 1 else 1)
+        actual = outcomes[match_id]
+        actual_flats.append(flat_index(actual[0], actual[1]))
+
+    total = sum(
+        lut[tip_flats[idx], actual_flats[idx]] * joker_mult[idx]
+        for idx in range(len(match_ids))
+    )
+    assert total == expected
+
+
 def test_load_and_simulate_missing_round() -> None:
     from megax.simulate import load_and_simulate
 
     with pytest.raises(FileNotFoundError):
         load_and_simulate("missing-round-key")
+
+
+def test_simulate_optimizer_uses_calibrated_knobs() -> None:
+    from megax.calibrate import build_lineup_for_knobs, knobs_from_snapshot
+    from megax.storage import load_round_record
+
+    record = load_round_record("2026-07-24_2026-07-27")
+    if record is None or record.state.calibration is None:
+        pytest.skip("Round snapshot with calibration required")
+
+    calibrated = build_lineup_for_knobs(
+        record.matches,
+        record.state,
+        knobs_from_snapshot(record.state.calibration),
+    )
+    assert calibrated is not None
+
+    result = simulate_round_record(
+        record,
+        sim_config=SimulationConfig(
+            universes=50,
+            field_size=record.state.field_size,
+            crowd_players=40,
+            seed=1,
+        ),
+        include_saved_agents=False,
+    )
+    assert result.optimizer_note.startswith("calibrated")
+    optimizer_a = next(agent for agent in result.agents if agent.name == "optimizer_a")
+    optimizer_b = next(agent for agent in result.agents if agent.name == "optimizer_b")
+    assert optimizer_a.tips == calibrated.account_a.tips_by_match()
+    assert optimizer_b.tips == calibrated.account_b.tips_by_match()
+
+
+def test_format_simulation_report_includes_tips(tmp_path, monkeypatch) -> None:
+    from test_probability import _plzen_match
+
+    monkeypatch.setattr("megax.storage.rounds_data_dir", lambda: tmp_path)
+    match = _plzen_match()
+    state = RoundGuiState(field_size=5_000)
+    state.ensure_match(match.match_id)
+    state.money[str(match.match_id)] = {
+        "tipsport": {"home": 70, "draw": 15, "away": 15, "over": 50, "under": 50},
+        "fortuna": {"home": 75, "draw": 10, "away": 15, "over": 55, "under": 45},
+        "sazkabet": {"home": 72, "draw": 12, "away": 16, "over": 52, "under": 48},
+    }
+    record = RoundRecord(
+        round_key="report-sim",
+        state=state,
+        matches=(match,),
+        saved_at=datetime.now(timezone.utc),
+    )
+    result = simulate_round_record(
+        record,
+        sim_config=SimulationConfig(universes=50, field_size=5_000, crowd_players=20, seed=1),
+        include_saved_agents=False,
+    )
+    report = format_simulation_report(result)
+    assert "Tips by agent" in report
+    assert "pure_ev" in report
+    assert match.name.replace(" - ", "–") in report or match.name in report

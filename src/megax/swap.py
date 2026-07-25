@@ -221,6 +221,9 @@ def compute_swap_recommendation(
 
     swap_cfg = config or swap_config_from_env(megax_config)
     current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    if not any(slot.kickoff_at <= current for slot in snapshot.slots):
+        return None
+
     remaining_matches, next_slot = _remaining_matches(snapshot, now=current)
     if not remaining_matches:
         return None

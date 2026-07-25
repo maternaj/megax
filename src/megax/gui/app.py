@@ -11,6 +11,13 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
+from megax.calibrate import (
+    build_lineup_for_knobs,
+    calibration_snapshot_from_result,
+    gui_simulation_config,
+    knobs_from_snapshot,
+    load_and_calibrate,
+)
 from megax.config import load_config
 from megax.gui.render import render_page
 from megax.gui.service import build_round_view, snapshot_from_record
@@ -145,6 +152,7 @@ def create_app() -> FastAPI:
         saved: int | None = None,
         filled: int | None = None,
         swapped: int | None = None,
+        calibrated: int | None = None,
     ) -> HTMLResponse:
         date_from, date_to, from_day_str, to_day_str = _window_from_form(from_day, to_day)
         key = round_key(date_from, date_to)
@@ -170,6 +178,8 @@ def create_app() -> FastAPI:
             message = "Tipy A/B a žolíky vyplněny z optimizeru."
         if swapped:
             message = "Late swap tipy aplikovány pro zbývající sloty."
+        if calibrated:
+            message = "Kalibrace dokončena — tipy A/B vyplněny doporučenými knoby."
         html = render_page(view, message=message)
         return HTMLResponse(html)
 
@@ -301,6 +311,92 @@ def create_app() -> FastAPI:
         _persist_round(key=key, state=state, snapshot=snapshot)
         return RedirectResponse(
             url=f"/?from_day={from_day_str}&to_day={to_day_str}&swapped=1",
+            status_code=303,
+        )
+
+    def _apply_calibrated_lineup(state: RoundGuiState, snapshot) -> bool:
+        if state.calibration is None:
+            return False
+        lineup = build_lineup_for_knobs(
+            tuple(snapshot.matches),
+            state,
+            knobs_from_snapshot(state.calibration),
+        )
+        if lineup is None:
+            return False
+        apply_lineup_to_state(state, lineup)
+        return True
+
+    @app.post("/calibrate-and-apply")
+    async def calibrate_and_apply(request: Request) -> RedirectResponse:
+        form = dict(await request.form())
+        from_day = form.get("from_day")
+        to_day = form.get("to_day")
+        date_from, date_to, from_day_str, to_day_str = _window_from_form(from_day, to_day)
+        key = round_key(date_from, date_to)
+        client = _tipsport_client()
+        state, snapshot, read_only, _saved_at = _resolve_round(
+            date_from=date_from,
+            date_to=date_to,
+            key=key,
+            client=client,
+        )
+        if read_only:
+            return RedirectResponse(
+                url=f"/?from_day={from_day_str}&to_day={to_day_str}",
+                status_code=303,
+            )
+        match_ids = [match.match_id for match in snapshot.matches]
+        _apply_form_to_state(state, form=form, match_ids=match_ids)
+        _persist_round(key=key, state=state, snapshot=snapshot)
+
+        record = load_round_record(key)
+        if record is None:
+            raise RuntimeError(f"Round snapshot missing after persist: {key}")
+
+        result = load_and_calibrate(
+            key,
+            sim_config=gui_simulation_config(state.field_size),
+            quick=True,
+        )
+        state.calibration = calibration_snapshot_from_result(result)
+        if not _apply_calibrated_lineup(state, snapshot):
+            raise RuntimeError("Kalibrace proběhla, ale lineup se nepodařilo sestavit.")
+        _persist_round(key=key, state=state, snapshot=snapshot)
+        return RedirectResponse(
+            url=f"/?from_day={from_day_str}&to_day={to_day_str}&calibrated=1",
+            status_code=303,
+        )
+
+    @app.post("/apply-calibrated-lineup")
+    async def apply_calibrated_lineup(request: Request) -> RedirectResponse:
+        form = dict(await request.form())
+        from_day = form.get("from_day")
+        to_day = form.get("to_day")
+        date_from, date_to, from_day_str, to_day_str = _window_from_form(from_day, to_day)
+        key = round_key(date_from, date_to)
+        client = _tipsport_client()
+        state, snapshot, read_only, _saved_at = _resolve_round(
+            date_from=date_from,
+            date_to=date_to,
+            key=key,
+            client=client,
+        )
+        if read_only:
+            return RedirectResponse(
+                url=f"/?from_day={from_day_str}&to_day={to_day_str}",
+                status_code=303,
+            )
+        match_ids = [match.match_id for match in snapshot.matches]
+        _apply_form_to_state(state, form=form, match_ids=match_ids)
+        if not _apply_calibrated_lineup(state, snapshot):
+            return RedirectResponse(
+                url=f"/?from_day={from_day_str}&to_day={to_day_str}",
+                status_code=303,
+            )
+        _persist_round(key=key, state=state, snapshot=snapshot)
+        return RedirectResponse(
+            url=f"/?from_day={from_day_str}&to_day={to_day_str}&filled=1",
             status_code=303,
         )
 

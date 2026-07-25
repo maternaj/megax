@@ -117,6 +117,38 @@ def test_apply_swap_updates_only_remaining_tips() -> None:
     assert state.accounts["A"].tips[str(plzen.match_id)] == locked_tip
 
 
+def test_compute_swap_recommendation_before_first_slot_returns_none() -> None:
+    from test_probability import _plzen_match
+
+    base = datetime(2026, 7, 25, 8, 0, tzinfo=timezone.utc)
+    plzen = replace(_plzen_match(), kickoff_at=datetime(2026, 7, 25, 15, 0, tzinfo=timezone.utc))
+    matches = (plzen,)
+    state = RoundGuiState(field_size=10_000)
+    state.ensure_match(plzen.match_id)
+    state.money[str(plzen.match_id)] = {
+        "tipsport": {"home": 70, "draw": 15, "away": 15, "over": 50, "under": 50},
+        "fortuna": {"home": 75, "draw": 10, "away": 15, "over": 55, "under": 45},
+        "sazkabet": {"home": 72, "draw": 12, "away": 16, "over": 52, "under": 48},
+    }
+    snapshot = RoundSnapshot(
+        competition_id=120,
+        date_from=base,
+        date_to=base + timedelta(days=3),
+        fetched_at=base,
+        matches=matches,
+        slots=tuple(group_by_kickoff_slot(list(matches))),
+    )
+    contexts = build_lineup_contexts(matches, state)
+    swap = compute_swap_recommendation(
+        snapshot=snapshot,
+        state=state,
+        contexts=contexts,
+        results={},
+        now=base,
+    )
+    assert swap is None
+
+
 def test_estimate_leader_points() -> None:
     from test_probability import _plzen_match
 
