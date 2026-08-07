@@ -183,9 +183,10 @@ def poll_match_results(
     *,
     kickoffs: dict[int, datetime] | None = None,
     min_delay: timedelta | None = None,
+    now: datetime | None = None,
 ) -> dict[int, MatchResult | None]:
     results: dict[int, MatchResult | None] = {}
-    now = datetime.now(timezone.utc)
+    now = now or datetime.now(timezone.utc)
     delay = min_delay or DEFAULT_RESULTS_POLL_DELAY
     for match_id in match_ids:
         kickoff = (kickoffs or {}).get(match_id)

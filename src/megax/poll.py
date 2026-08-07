@@ -37,6 +37,7 @@ def poll_once(
     kickoffs: dict[int, datetime] | None = None,
     config: MegaxConfig | None = None,
     client: TipsportClient | None = None,
+    now: datetime | None = None,
 ) -> ResultsPollSnapshot:
     config = config or load_config()
     client = client or TipsportClient(
@@ -49,9 +50,11 @@ def poll_once(
         match_ids,
         kickoffs=kickoffs,
         min_delay=delay,
+        now=now,
     )
+    polled_at = now or datetime.now(timezone.utc)
     return ResultsPollSnapshot(
-        polled_at=datetime.now(timezone.utc),
+        polled_at=polled_at,
         results=results,
     )
 

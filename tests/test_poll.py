@@ -43,6 +43,7 @@ def test_poll_match_results_skips_prematch() -> None:
         [8212280],
         kickoffs={8212280: kickoff},
         min_delay=timedelta(hours=1, minutes=45),
+        now=datetime(2026, 7, 25, 19, 44, tzinfo=timezone.utc),
     )
     assert results == {8212280: None}
     client.fetch_match_results.assert_not_called()
@@ -69,6 +70,7 @@ def test_poll_once_skips_when_kickoff_too_recent() -> None:
         [8212280],
         kickoffs={8212280: kickoff},
         client=client,
+        now=datetime(2026, 7, 25, 19, 44, tzinfo=timezone.utc),
     )
     assert snapshot.results == {8212280: None}
     client.fetch_match_results.assert_not_called()
