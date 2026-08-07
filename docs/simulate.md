@@ -21,7 +21,7 @@ See also: [`design.md`](design.md) (architecture), [`README.md`](../README.md) (
 ## Command
 
 ```bash
-cd ~/optagame/megax
+cd ~/megax
 
 # Quick check (~1 min)
 megax simulate --round 2026-07-24_2026-07-27 \

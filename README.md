@@ -69,7 +69,7 @@ Round snapshots (tips + last-known odds, no odds history) persist under `data/ro
 ## Setup
 
 ```bash
-cd ~/optagame/megax
+cd ~/megax
 python3 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 cp .env.example .env
