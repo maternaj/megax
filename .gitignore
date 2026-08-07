@@ -7,4 +7,6 @@ __pycache__/
 .mypy_cache/
 data/
 logs/
+megax-gui.pid
+nohup.out
 state/

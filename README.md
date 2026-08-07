@@ -4,7 +4,7 @@ Optimization engine for **Megatipovačka** (Tipsport/Chance free-to-play exact-s
 
 Given closing-line odds (1X2, U/O 2.5) and public money distribution, MegaX estimates score probabilities, models crowd behaviour, and selects lineups (8 matches + optional joker) to maximize the chance of winning a round — not just expected points.
 
-Standalone repo under optagame (same layout as [deltax](https://github.com/maternaj/deltax), [sharpener](https://github.com/maternaj/sharpener)).
+Standalone repo at `~/megax/` (same sibling layout as [deltax](https://github.com/maternaj/deltax), [sharpener](https://github.com/maternaj/sharpener)).
 
 ## Status
 
@@ -30,6 +30,8 @@ megax calibrate --round 2026-07-24_2026-07-27 --quick
 Session state is cached in `state/tipsport_scraper_state.json` (same init-web + cloudscraper pattern as deltax).
 
 ## GUI
+
+Production on VPS: `./scripts/start_vps_production.sh start` — see [`how_to_run.md`](how_to_run.md).
 
 ```bash
 # default http://0.0.0.0:18555
