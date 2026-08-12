@@ -6,6 +6,7 @@ import math
 from dataclasses import dataclass
 
 from megax.crowd import CrowdMatrixResult
+from megax.crowd_observed import DISPLAY_MAX_GOALS
 from megax.ev import EvResult, compute_ev, format_tip, iter_tip_candidates
 from megax.probability import ScoreMatrixResult
 
@@ -13,9 +14,9 @@ MIN_CROWD_SHARE = 1e-8
 MIN_GPP_CROWD_SHARE = 0.005
 MAX_GPP_CROWD_SHARE = 0.12
 DEFAULT_GPP_EV_RATIO = 0.85
-DEFAULT_GPP_ALPHA = 1.10
+DEFAULT_GPP_ALPHA = 1.0
 DEFAULT_FIELD_SIZE = 50_000
-DEFAULT_GPP_MAX_GOALS = 4
+DEFAULT_GPP_MAX_GOALS = DISPLAY_MAX_GOALS
 
 
 @dataclass(frozen=True)
@@ -50,7 +51,19 @@ def crowd_share(
     home: int,
     away: int,
 ) -> float:
-    grid = crowd.matrix if isinstance(crowd, CrowdMatrixResult) else crowd
+    if isinstance(crowd, CrowdMatrixResult):
+        if crowd.known is not None:
+            known = crowd.known[home][away] if (
+                0 <= home < len(crowd.known) and 0 <= away < len(crowd.known[0])
+            ) else False
+            est = False
+            if crowd.estimated is not None and 0 <= home < len(crowd.estimated):
+                est = crowd.estimated[home][away]
+            if not known and not est:
+                return -1.0
+        grid = crowd.matrix
+    else:
+        grid = crowd
     if home < 0 or away < 0 or home >= len(grid) or away >= len(grid[0]):
         return 0.0
     return max(grid[home][away], 0.0)
@@ -66,7 +79,8 @@ def gpp_alpha_from_field_size(field_size: int) -> float:
 def resolve_gpp_alpha(field_size: int, *, override: float | None = None) -> float:
     if override is not None:
         return max(override, 0.0)
-    return gpp_alpha_from_field_size(field_size)
+    _ = field_size
+    return DEFAULT_GPP_ALPHA
 
 
 def utility_score(ev: float, crowd: float, *, alpha: float) -> float:
@@ -84,21 +98,32 @@ def iter_utility_candidates(
     alpha: float,
     max_goals: int | None = DEFAULT_GPP_MAX_GOALS,
     min_ev: float = 0.0,
+    apply_crowd_bounds: bool = True,
 ) -> tuple[UtilityCandidate, ...]:
     candidates: list[UtilityCandidate] = []
     for tip in iter_tip_candidates(prob, max_goals=max_goals):
         if tip.ev < min_ev:
             continue
         share = crowd_share(crowd, tip.home, tip.away)
-        if share < MIN_GPP_CROWD_SHARE or share > MAX_GPP_CROWD_SHARE:
+        if share < 0:
             continue
+        if share == 0.0:
+            if tip.ev <= 0:
+                continue
+            eff_share = MIN_CROWD_SHARE
+        elif apply_crowd_bounds and (
+            share < MIN_GPP_CROWD_SHARE or share > MAX_GPP_CROWD_SHARE
+        ):
+            continue
+        else:
+            eff_share = min(max(share, MIN_GPP_CROWD_SHARE), MAX_GPP_CROWD_SHARE)
         candidates.append(
             UtilityCandidate(
                 home=tip.home,
                 away=tip.away,
                 ev=tip.ev,
                 crowd_share=share,
-                utility=utility_score(tip.ev, share, alpha=alpha),
+                utility=utility_score(tip.ev, eff_share, alpha=alpha),
             )
         )
     return tuple(candidates)
@@ -112,6 +137,7 @@ def rank_tips_by_utility(
     top_n: int = 3,
     max_goals: int | None = DEFAULT_GPP_MAX_GOALS,
     min_ev: float = 0.0,
+    apply_crowd_bounds: bool = True,
 ) -> tuple[UtilityCandidate, ...]:
     ranked = sorted(
         iter_utility_candidates(
@@ -120,6 +146,7 @@ def rank_tips_by_utility(
             alpha=alpha,
             max_goals=max_goals,
             min_ev=min_ev,
+            apply_crowd_bounds=apply_crowd_bounds,
         ),
         key=lambda candidate: (-candidate.utility, -candidate.ev, -candidate.home, -candidate.away),
     )
@@ -139,15 +166,15 @@ def compute_match_analysis(
     top_n: int = 3,
 ) -> MatchTipAnalysis:
     alpha = resolve_gpp_alpha(field_size, override=gpp_alpha) + max(alpha_boost, 0.0)
-    ev = compute_ev(prob, top_n=top_n)
-    ratio = DEFAULT_GPP_EV_RATIO if gpp_ev_ratio is None else gpp_ev_ratio
-    min_ev = ev.best.ev * ratio
+    ev = compute_ev(prob, top_n=top_n, max_goals=DISPLAY_MAX_GOALS)
     gpp_top = rank_tips_by_utility(
         prob,
         crowd,
         alpha=alpha,
-        top_n=max(top_n, 1),
-        min_ev=min_ev,
+        top_n=max(top_n, 3),
+        min_ev=0.0,
+        max_goals=DISPLAY_MAX_GOALS,
+        apply_crowd_bounds=False,
     )
     if not gpp_top:
         raise ValueError("No utility candidates")

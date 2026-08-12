@@ -1,0 +1,1794 @@
+{
+  "pagination": {
+    "page": 1,
+    "limit": 50,
+    "nextPage": true,
+    "prevPage": false,
+    "offset": 0
+  },
+  "competitionList": [
+    {
+      "competitionId": 161,
+      "competitionName": "Megatipovačka o 125 milionů",
+      "mainCompetition": true,
+      "actual": false
+    },
+    {
+      "competitionId": 162,
+      "competitionName": "Fanouškovská",
+      "mainCompetition": false,
+      "actual": false
+    }
+  ],
+  "seriesListName": "Období",
+  "serieList": [
+    {
+      "serieName": "Celkem",
+      "canShow": true,
+      "actualSerie": false
+    },
+    {
+      "serieId": 141,
+      "serieName": "Podzim",
+      "canShow": true,
+      "actualSerie": false
+    },
+    {
+      "serieId": 142,
+      "serieName": "Jaro",
+      "canShow": false,
+      "actualSerie": false
+    }
+  ],
+  "roundListName": "Kolo",
+  "roundList": [
+    {
+      "roundName": "Celkem",
+      "canShow": true
+    },
+    {
+      "roundId": 381,
+      "roundNumber": 1,
+      "roundName": "1. kolo",
+      "roundStatus": "EVALUATED",
+      "roundStatusName": "Vyhodnoceno",
+      "actualRound": false,
+      "canShow": true
+    },
+    {
+      "roundId": 382,
+      "roundNumber": 2,
+      "roundName": "2. kolo",
+      "roundStatus": "EVALUATED",
+      "roundStatusName": "Vyhodnoceno",
+      "actualRound": false,
+      "canShow": true
+    },
+    {
+      "roundId": 383,
+      "roundNumber": 3,
+      "roundName": "3. kolo",
+      "roundStatus": "IN_PROGRESS",
+      "roundStatusName": "Probíhá",
+      "allTipsDoneIcon": {
+        "code": "i170",
+        "type": "I_ICON"
+      },
+      "allTipsDone": true,
+      "actualRound": false,
+      "canShow": true,
+      "clientTipsStatus": {
+        "code": "i170",
+        "type": "I_ICON"
+      }
+    },
+    {
+      "roundId": 384,
+      "roundNumber": 4,
+      "roundName": "4. kolo",
+      "roundStatus": "OPENED",
+      "roundStatusName": "Otevřeno",
+      "allTipsDoneIcon": {
+        "code": "i171",
+        "type": "I_ICON"
+      },
+      "allTipsDone": false,
+      "actualRound": false,
+      "canShow": true,
+      "clientTipsStatus": {
+        "code": "i171",
+        "type": "I_ICON"
+      }
+    },
+    {
+      "roundId": 385,
+      "roundNumber": 5,
+      "roundName": "5. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 386,
+      "roundNumber": 6,
+      "roundName": "6. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 387,
+      "roundNumber": 7,
+      "roundName": "7. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 388,
+      "roundNumber": 8,
+      "roundName": "8. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 401,
+      "roundNumber": 9,
+      "roundName": "9. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 389,
+      "roundNumber": 10,
+      "roundName": "10. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 390,
+      "roundNumber": 11,
+      "roundName": "11. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 402,
+      "roundNumber": 12,
+      "roundName": "12. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 391,
+      "roundNumber": 13,
+      "roundName": "13. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 392,
+      "roundNumber": 14,
+      "roundName": "14. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 403,
+      "roundNumber": 15,
+      "roundName": "15. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 393,
+      "roundNumber": 16,
+      "roundName": "16. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 404,
+      "roundNumber": 17,
+      "roundName": "17. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    },
+    {
+      "roundId": 394,
+      "roundNumber": 18,
+      "roundName": "18. kolo",
+      "roundStatus": "HIDDEN",
+      "roundStatusName": "Neotevřeno",
+      "actualRound": false,
+      "canShow": false
+    }
+  ],
+  "rankingColumnNames": [
+    "#",
+    "Uživatelské jméno",
+    "Tým",
+    "Výhra",
+    "Skóre"
+  ],
+  "clientsRankingEntries": [
+    {
+      "position": 1,
+      "score": 32,
+      "client": {
+        "avatar": {
+          "username": "dazo28",
+          "imagePath": "avatarSK/17/349/417349_2.png",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 20,
+          "registrationState": 17,
+          "encryptedClientId": "ajwP2OS7jAqz2Sgipg8bbw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/22/Sigma.png",
+        "teamName": "Olomouc"
+      },
+      "positionWithPrize": true,
+      "prize": "250 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 2,
+      "score": 32,
+      "client": {
+        "avatar": {
+          "username": "Tereza12429",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "3KUIqZ0zYGnp-ENI-91JDg"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "100 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 3,
+      "score": 32,
+      "client": {
+        "avatar": {
+          "username": "barca555",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "t1C3vusp9KN4DlB1lfCEMA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "50 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 4,
+      "score": 32,
+      "client": {
+        "avatar": {
+          "username": "Gladhandz",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "1RlmNNbcF3ptYkJNTCNeXw"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "40 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 5,
+      "score": 32,
+      "client": {
+        "avatar": {
+          "username": "KosinaLadislav",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "HPwRkPKUIbLKpYpi2cwNaA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "30 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 6,
+      "score": 30,
+      "client": {
+        "avatar": {
+          "username": "Kloknek",
+          "imagePath": "avatarCZ/12/509/15012509_0.png?v=okIK",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "CLaBd-KGNZr4spEABeEPcw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "25 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 7,
+      "score": 30,
+      "client": {
+        "avatar": {
+          "username": "Paula001",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 21,
+          "registrationState": 0,
+          "encryptedClientId": "Ls5gJgAzFNO8RRv9GJ1l0Q"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "20 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 8,
+      "score": 30,
+      "client": {
+        "avatar": {
+          "username": "Dusiferrr",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 21,
+          "registrationState": 0,
+          "encryptedClientId": "RPyOrbNH3Zrrxed55A33_g"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "15 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 9,
+      "score": 30,
+      "client": {
+        "avatar": {
+          "username": "Toush9",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "1EXSCKCUzWK6XMFp08yrHQ"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "12 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 10,
+      "score": 30,
+      "client": {
+        "avatar": {
+          "username": "katerina129",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "dsewRzOIglLrBAco1RTnyw"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "8 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 11,
+      "score": 28,
+      "client": {
+        "avatar": {
+          "username": "frantisek90",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "NwXup-Pte-WApZxCLs06HA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/1/Slavia.png",
+        "teamName": "Slavia Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "4 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 12,
+      "score": 28,
+      "client": {
+        "avatar": {
+          "username": "recon11",
+          "imagePath": "avatarCZ/11/895/11411895_5.png?v=RG7O",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "sxym3jcb75CB5T3hzrGDKA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/21/Liberec.png",
+        "teamName": "Liberec"
+      },
+      "positionWithPrize": true,
+      "prize": "4 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 13,
+      "score": 28,
+      "client": {
+        "avatar": {
+          "username": "vladimirkonvicka99",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "fOsMMK3m8G1n_5O-uRfp7A"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/9/Teplice.png",
+        "teamName": "Teplice"
+      },
+      "positionWithPrize": true,
+      "prize": "4 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 14,
+      "score": 28,
+      "client": {
+        "avatar": {
+          "username": "matomoso74",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 20,
+          "registrationState": 17,
+          "encryptedClientId": "MuVk_PhDEjaRPWu1Rsqs3A"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "4 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 15,
+      "score": 28,
+      "client": {
+        "avatar": {
+          "username": "majklnajt120",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "G8eLkH08CzSkh0iOtF4hiQ"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "4 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 16,
+      "score": 28,
+      "client": {
+        "avatar": {
+          "username": "628645",
+          "imagePath": "avatarCZ/36/499/10136499_0.png",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "G_oTgp8h3deL_D3oT517xQ"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/5/Hradec%20Kr..png",
+        "teamName": "Hradec Králové"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 17,
+      "score": 28,
+      "client": {
+        "avatar": {
+          "username": "YukioKazi",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "dyvohhyamUJLqUbtvO7yTQ"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/81/Artis.png",
+        "teamName": "Artis Brno"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 18,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Katy23",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "2BafPamfBRBjH5MzPQW70w"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/1/Slavia.png",
+        "teamName": "Slavia Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 19,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Natalie1097",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "8AzLY64QQ3FIlo0hncA4bw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/4/Ostrava.png",
+        "teamName": "Ostrava"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 20,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "305072",
+          "imagePath": "avatarCZ/02/150/10102150_0.png?v=aHkS",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "tVLSk-3gVRVKqb78jkUtWA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 21,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Bohemak43",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "iBr999uwgca0KafNTgAkxQ"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 22,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "drazti",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "tZqoeXQIepURGYNurcz5Xg"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/101/Zbrojovka.png",
+        "teamName": "Zbrojovka Brno"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 23,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Janaicka",
+          "imagePath": "avatarCZ/03/628/15203628_0.png",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "hM9pKrb_OLRqvekA8lLCvQ"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 24,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Jozef6963",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 20,
+          "registrationState": 17,
+          "encryptedClientId": "dNo5Z5Rg4pHlDtNsWMkvMw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/1/Slavia.png",
+        "teamName": "Slavia Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 25,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Karel4689",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "cGIKDyGPUzUcn3in038P-g"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 26,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "OrsiPetra",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "UbmqvrMBDDEG1iQgIbmPoQ"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 27,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Vladyslav505",
+          "imagePath": "images/community/avatar/mascots/01.png",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "qVYNWExG_JtAQ-VNxm2NoQ"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 28,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "mikula1",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 20,
+          "registrationState": 17,
+          "encryptedClientId": "mP5y81-6GQHXRKyvw6e8Nw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/11/Pardubice@1x.png",
+        "teamName": "Pardubice"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 29,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Vaky03",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "R7at95M29fckh0nnBUYntA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/21/Liberec.png",
+        "teamName": "Liberec"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 30,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Tereza9052",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "XtsbsBH9CLuI4DoUeSVsbA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/2/Plze%C5%88.png",
+        "teamName": "Plzeň"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 31,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Tuyencz",
+          "imagePath": "avatarCZ/69/911/11769911_9.png?v=4B3t",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "4L6JGXzsrtqhC08msDBzLA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/8/Ml.%20Boleslav.png",
+        "teamName": "Mladá Boleslav"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 32,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Jina1999",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "tPbRaxGvBp7v3GQxbrV0jA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/22/Sigma.png",
+        "teamName": "Olomouc"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 33,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Hullwath1913",
+          "imagePath": "avatarCZ/36/710/12436710_0.png",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "G1sZ7jQosPWPAqXeqOcy3g"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/81/Artis.png",
+        "teamName": "Artis Brno"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 34,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Patrik14850",
+          "imagePath": "avatarCZ/64/337/14164337_0.png?v=UNrJ",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "6K1vYIYRextHuLa9iEHulQ"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/9/Teplice.png",
+        "teamName": "Teplice"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 35,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "arnyf",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "AZYWNA_f6E0hO0oZeiH7wQ"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 36,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "eldosek6",
+          "imagePath": "images/community/avatar/monsters/M-12.png",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "jtxDXwnSqB3RUg2sqSUmOQ"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/5/Hradec%20Kr..png",
+        "teamName": "Hradec Králové"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 37,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "balvan",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "ToR7Jh9j3x_2hrOf0ySzjA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/21/Liberec.png",
+        "teamName": "Liberec"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 38,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "LatkoM",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "AYeJnqW6q_M_Q70--H1r8A"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 39,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "svortli",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "Fr-0-Z_kN0XTuCiCbm2NvA"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 40,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Marek11201",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "9ROtN_Brfs4WBgSsNhMBGg"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/2/Plze%C5%88.png",
+        "teamName": "Plzeň"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 41,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Vojtech10267",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "8dWIoilMnlwcmnZ6H0SBiw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 42,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "229638",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "uepuEZDHdza_AdQz8c4hAg"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/1/Slavia.png",
+        "teamName": "Slavia Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 43,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Nandu",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "sGPwhl5ak1b6wOX63gpgyw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/5/Hradec%20Kr..png",
+        "teamName": "Hradec Králové"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 44,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "beerceps",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "xZ3On4xDBIPlS01FO8mIEA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 45,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Stano1978",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "bnQ7ZQvOnYCio_vllAWGzw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 46,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Erik758",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 20,
+          "registrationState": 17,
+          "encryptedClientId": "DssocJrz5CSZHtfUfI93Fg"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/1/Slavia.png",
+        "teamName": "Slavia Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 47,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Radek13970",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "86G10VQFpwH7KSsR8Ye3Zw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 48,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Bartbiker",
+          "imagePath": "avatarCZ/80/374/14680374_0.png?v=lmS7",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "WjJi4Mgb6Un7jQUCvtIMfg"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 49,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "kabelac",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "Ars4yhZ1DGLFFeU5J18EcA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 50,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Martin32016",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "9eYhZCMWwiTypmux5IO9mQ"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    }
+  ],
+  "clientRankingEntry": {
+    "position": 11484,
+    "score": 10,
+    "client": {
+      "avatar": {
+        "username": "jmat3236",
+        "storageCountryId": 1,
+        "clientCountryNameId": 58,
+        "clientFirmId": 2,
+        "registrationState": 10,
+        "encryptedClientId": "qbfs84tcHU6nQrWTzfZUzw"
+      }
+    },
+    "team": {
+      "clientInTeam": false
+    },
+    "positionWithPrize": true,
+    "prize": "50 G",
+    "currentClientPosition": true
+  },
+  "prizeLimitsRankingEntries": [
+    {
+      "position": 1,
+      "score": 32,
+      "client": {
+        "avatar": {
+          "username": "dazo28",
+          "imagePath": "avatarSK/17/349/417349_2.png",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 20,
+          "registrationState": 17,
+          "encryptedClientId": "ajwP2OS7jAqz2Sgipg8bbw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/22/Sigma.png",
+        "teamName": "Olomouc"
+      },
+      "positionWithPrize": true,
+      "prize": "250 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 2,
+      "score": 32,
+      "client": {
+        "avatar": {
+          "username": "Tereza12429",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "3KUIqZ0zYGnp-ENI-91JDg"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "100 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 3,
+      "score": 32,
+      "client": {
+        "avatar": {
+          "username": "barca555",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "t1C3vusp9KN4DlB1lfCEMA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "50 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 4,
+      "score": 32,
+      "client": {
+        "avatar": {
+          "username": "Gladhandz",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "1RlmNNbcF3ptYkJNTCNeXw"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "40 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 5,
+      "score": 32,
+      "client": {
+        "avatar": {
+          "username": "KosinaLadislav",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "HPwRkPKUIbLKpYpi2cwNaA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "30 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 6,
+      "score": 30,
+      "client": {
+        "avatar": {
+          "username": "Kloknek",
+          "imagePath": "avatarCZ/12/509/15012509_0.png?v=okIK",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "CLaBd-KGNZr4spEABeEPcw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "25 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 7,
+      "score": 30,
+      "client": {
+        "avatar": {
+          "username": "Paula001",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 21,
+          "registrationState": 0,
+          "encryptedClientId": "Ls5gJgAzFNO8RRv9GJ1l0Q"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "20 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 8,
+      "score": 30,
+      "client": {
+        "avatar": {
+          "username": "Dusiferrr",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 21,
+          "registrationState": 0,
+          "encryptedClientId": "RPyOrbNH3Zrrxed55A33_g"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "15 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 9,
+      "score": 30,
+      "client": {
+        "avatar": {
+          "username": "Toush9",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "1EXSCKCUzWK6XMFp08yrHQ"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "12 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 10,
+      "score": 30,
+      "client": {
+        "avatar": {
+          "username": "katerina129",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "dsewRzOIglLrBAco1RTnyw"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "8 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 15,
+      "score": 28,
+      "client": {
+        "avatar": {
+          "username": "majklnajt120",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "G8eLkH08CzSkh0iOtF4hiQ"
+        }
+      },
+      "team": {
+        "clientInTeam": false
+      },
+      "positionWithPrize": true,
+      "prize": "4 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 25,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Karel4689",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "cGIKDyGPUzUcn3in038P-g"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "2 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 50,
+      "score": 26,
+      "client": {
+        "avatar": {
+          "username": "Martin32016",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "9eYhZCMWwiTypmux5IO9mQ"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "1 000 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 100,
+      "score": 22,
+      "client": {
+        "avatar": {
+          "username": "Mataneo",
+          "storageCountryId": 2,
+          "clientCountryNameId": 22,
+          "clientFirmId": 20,
+          "registrationState": 17,
+          "encryptedClientId": "cp4lsQklKo3myd-kxzlBfg"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/5/Hradec%20Kr..png",
+        "teamName": "Hradec Králové"
+      },
+      "positionWithPrize": true,
+      "prize": "500 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 500,
+      "score": 20,
+      "client": {
+        "avatar": {
+          "username": "davek09",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "HH2gPbcoW7ifnUjs8BqiAg"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "300 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 1000,
+      "score": 16,
+      "client": {
+        "avatar": {
+          "username": "ChonkyBoi",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "7PcJES17eC_rUt8Vg1K6Iw"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/23/Bohemians.png",
+        "teamName": "Bohemians 1905"
+      },
+      "positionWithPrize": true,
+      "prize": "200 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 2000,
+      "score": 16,
+      "client": {
+        "avatar": {
+          "username": "papouchsedy",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "CJvgDqb7nsuNRGLKq9tlYA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/21/Liberec.png",
+        "teamName": "Liberec"
+      },
+      "positionWithPrize": true,
+      "prize": "100 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 5000,
+      "score": 12,
+      "client": {
+        "avatar": {
+          "username": "TadeTan",
+          "imagePath": "avatarCZ/15/939/13615939_1.png?v=k8fP",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "uYcVGFwssVGcdjTLwrTw2A"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/6/Jablonec.png",
+        "teamName": "Jablonec"
+      },
+      "positionWithPrize": true,
+      "prize": "80 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 10000,
+      "score": 10,
+      "client": {
+        "avatar": {
+          "username": "dusha99",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 2,
+          "registrationState": 10,
+          "encryptedClientId": "MgIcywor7X0jdxf5GJI9LA"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/4/Ostrava.png",
+        "teamName": "Ostrava"
+      },
+      "positionWithPrize": true,
+      "prize": "60 G",
+      "currentClientPosition": false
+    },
+    {
+      "position": 20000,
+      "score": 8,
+      "client": {
+        "avatar": {
+          "username": "Pozi07",
+          "storageCountryId": 1,
+          "clientCountryNameId": 58,
+          "clientFirmId": 4,
+          "registrationState": 10,
+          "encryptedClientId": "XIZfx09ym1GgQpGuqN4nCg"
+        }
+      },
+      "team": {
+        "clientInTeam": true,
+        "teamImage": "https://www.tipsport.org/megatipovacka-teams/3/Sparta.png",
+        "teamName": "Sparta Praha"
+      },
+      "positionWithPrize": true,
+      "prize": "50 G",
+      "currentClientPosition": false
+    }
+  ],
+  "numberOfPlayersTotal": 100356,
+  "prizesAtLimitsFilter": "Hranice odměn"
+}

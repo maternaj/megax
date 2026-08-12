@@ -14,6 +14,7 @@ from megax.calibrate import (
     resolve_calibration_alpha,
 )
 from megax.gui.state import RoundGuiState
+from tests.crowd_fixtures import apply_sample_crowd
 from megax.simulate import SimulationConfig
 from megax.storage import RoundRecord, save_round_record
 
@@ -38,11 +39,7 @@ def test_load_and_calibrate_runs_grid(tmp_path, monkeypatch) -> None:
     match = _plzen_match()
     state = RoundGuiState(field_size=5_000)
     state.ensure_match(match.match_id)
-    state.money[str(match.match_id)] = {
-        "tipsport": {"home": 70, "draw": 15, "away": 15, "over": 50, "under": 50},
-        "fortuna": {"home": 75, "draw": 10, "away": 15, "over": 55, "under": 45},
-        "sazkabet": {"home": 72, "draw": 12, "away": 16, "over": 52, "under": 48},
-    }
+    apply_sample_crowd(state, match.match_id)
     record = RoundRecord(
         round_key="cal-test",
         state=state,

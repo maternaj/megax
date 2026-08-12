@@ -12,7 +12,8 @@ ProgressCallback = Callable[[int, int], None]
 
 from megax.config import MegaxConfig, load_config
 from megax.simulate_engine import prepare_simulation, run_simulation_vectorized
-from megax.crowd import CrowdMatrixResult, build_crowd_matrix
+from megax.crowd import CrowdMatrixResult
+from megax.crowd_observed import CROWD_GRID_SIZE, build_crowd_matrix_from_observed
 from megax.ev import parse_tip
 from megax.lineup import MatchLineupContext, RoundLineup, build_round_lineup
 from megax.probability import ScoreMatrixResult, build_score_matrix_from_match
@@ -76,6 +77,7 @@ class SimulationResult:
     field_size: int
     agents: tuple[AgentStats, ...]
     matches: tuple[MegaxMatch, ...] = ()
+    skipped_match_ids: tuple[int, ...] = ()
     optimizer_note: str | None = None
 
 
@@ -96,14 +98,11 @@ def build_match_sim_contexts(
         prob = build_score_matrix_from_match(match)
         if prob is None:
             continue
-        crowd = build_crowd_matrix(
-            prob,
-            state.money[str(match.match_id)],
-            blend_to_p=cfg.crowd_blend_to_p,
-            tail_gamma=cfg.crowd_tail_gamma,
-            zero_zero_delta=cfg.crowd_zero_zero_delta,
-            prelec_alpha=cfg.crowd_prelec_alpha,
-            zero_zero_min=cfg.crowd_zero_zero_min,
+        crowd = build_crowd_matrix_from_observed(
+            state.crowd_cells_for_match(match.match_id),
+            grid_size=CROWD_GRID_SIZE,
+            prob=prob,
+            top3_keys=state.top3_cell_keys(match.match_id),
         )
         analysis = compute_match_analysis(
             prob,
@@ -197,7 +196,7 @@ def build_default_agents(
     agents: list[AgentSpec] = [
         AgentSpec(name="pure_ev", tips=ev_tips),
         AgentSpec(
-            name="gpp",
+            name="ev_c",
             tips={ctx.match_id: ctx.analysis.gpp_best.score for ctx in contexts},
         ),
     ]
@@ -338,13 +337,19 @@ def simulate_round_record(
 ) -> SimulationResult:
     cfg = sim_config or SimulationConfig(field_size=record.state.field_size)
     contexts = build_match_sim_contexts(record.matches, record.state)
-    if len(contexts) != len(record.matches):
-        raise ValueError("Missing probability/crowd data for one or more matches")
+    if not contexts:
+        raise ValueError("Žádný zápas s maticí P — simulaci nelze spustit.")
+    sim_ids = {ctx.match_id for ctx in contexts}
+    sim_matches = tuple(m for m in record.matches if m.match_id in sim_ids)
+    skipped = tuple(m.match_id for m in record.matches if m.match_id not in sim_ids)
     lineup, optimizer_note = build_optimizer_lineup(
-        record.matches,
+        sim_matches,
         record.state,
         contexts=contexts,
     )
+    if skipped:
+        skip_note = f"ignorováno {len(skipped)} zápasů bez P"
+        optimizer_note = f"{optimizer_note} · {skip_note}" if optimizer_note else skip_note
     agents = build_default_agents(
         contexts,
         lineup=lineup,
@@ -356,7 +361,8 @@ def simulate_round_record(
         crowd_players=result.crowd_players,
         field_size=result.field_size,
         agents=result.agents,
-        matches=record.matches,
+        matches=sim_matches,
+        skipped_match_ids=skipped,
         optimizer_note=optimizer_note,
     )
 
@@ -431,3 +437,56 @@ def load_and_simulate(
     if record is None:
         raise FileNotFoundError(f"Round snapshot not found: {round_key}")
     return simulate_round_record(record, sim_config=sim_config, progress=progress)
+
+
+def gui_simulation_config(
+    field_size: int,
+    *,
+    universes: int | None = None,
+    crowd_players: int | None = None,
+    seed: int | None = None,
+) -> SimulationConfig:
+    """Default simulate settings for GUI (quick, reproducible)."""
+    import os
+
+    u = universes if universes is not None else int(os.getenv("MEGAX_GUI_SIM_UNIVERSES", "2000"))
+    crowd = crowd_players if crowd_players is not None else int(
+        os.getenv("MEGAX_GUI_SIM_CROWD", "400")
+    )
+    if seed is not None:
+        seed_val = seed
+    else:
+        seed_raw = os.getenv("MEGAX_GUI_SIM_SEED", "42")
+        seed_val = int(seed_raw) if seed_raw.strip() else 42
+    return SimulationConfig(
+        universes=u,
+        field_size=field_size,
+        crowd_players=crowd,
+        seed=seed_val,
+    )
+
+
+def simulation_snapshot_from_result(result: SimulationResult):
+    from datetime import datetime, timezone
+
+    from megax.gui.state import SimulationAgentSnapshot, SimulationSnapshot
+
+    return SimulationSnapshot(
+        universes=result.universes,
+        crowd_players=result.crowd_players,
+        field_size=result.field_size,
+        simulated_at=datetime.now(timezone.utc).isoformat(),
+        agents=tuple(
+            SimulationAgentSnapshot(
+                name=agent.name,
+                mean_points=agent.mean_points,
+                p_win=agent.p_win,
+                p_top_10=agent.p_top_10,
+                p_top_100=agent.p_top_100,
+                p_top_1000=agent.p_top_1000,
+            )
+            for agent in result.agents
+        ),
+        skipped_match_ids=result.skipped_match_ids,
+        note=result.optimizer_note,
+    )

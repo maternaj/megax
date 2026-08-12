@@ -10,3 +10,4 @@ logs/
 megax-gui.pid
 nohup.out
 state/
+har/*.har

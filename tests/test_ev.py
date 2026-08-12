@@ -15,6 +15,7 @@ from megax.ev import (
     iter_tip_candidates,
     parse_tip,
     rank_tips_by_ev,
+    tip_points_distribution,
 )
 from megax.probability import build_score_matrix_from_match, probability
 from megax.scoring import points
@@ -83,6 +84,14 @@ def test_compute_ev_exposes_best_and_top3() -> None:
     assert result.best == result.top[0]
     assert result.top3[0].ev >= result.top3[1].ev
     assert result.grid_size == prob.grid_size
+
+
+def test_tip_points_distribution_sums_to_one() -> None:
+    prob = _prob()
+    dist = tip_points_distribution(prob, 2, 1, max_goals=5)
+    total = dist.p10 + dist.p6 + dist.p4 + dist.p2 + dist.p0
+    # 0–5 gólů okno — zbytek pravděpodobnosti je mimo mřížku
+    assert 0.90 <= total <= 1.0
 
 
 def test_plzen_best_ev_is_sensible_home_chalk() -> None:

@@ -1,0 +1,988 @@
+{
+  "seriesListName": "Období",
+  "seriesList": [
+    {
+      "serieId": 141,
+      "serieName": "Podzim",
+      "canShow": true,
+      "actualSerie": true
+    },
+    {
+      "serieId": 142,
+      "serieName": "Jaro",
+      "canShow": false,
+      "actualSerie": false
+    }
+  ],
+  "roundListName": "Kolo",
+  "roundList": [
+    {
+      "roundId": 381,
+      "roundName": "1. kolo",
+      "canShow": true,
+      "roundStatus": {
+        "statusType": "EVALUATED",
+        "statusName": "Vyhodnoceno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 382,
+      "roundName": "2. kolo",
+      "canShow": true,
+      "roundStatus": {
+        "statusType": "EVALUATED",
+        "statusName": "Vyhodnoceno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 383,
+      "roundName": "3. kolo",
+      "canShow": true,
+      "roundStatus": {
+        "statusType": "IN_PROGRESS",
+        "statusName": "Probíhá"
+      },
+      "actualRound": true,
+      "allTipsDone": true,
+      "allTipsDoneIcon": {
+        "code": "i170",
+        "type": "I_ICON"
+      },
+      "clientTipsStatus": "i170"
+    },
+    {
+      "roundId": 384,
+      "roundName": "4. kolo",
+      "canShow": true,
+      "roundStatus": {
+        "statusType": "OPENED",
+        "statusName": "Otevřeno"
+      },
+      "actualRound": false,
+      "allTipsDone": false,
+      "allTipsDoneIcon": {
+        "code": "i171",
+        "type": "I_ICON"
+      },
+      "clientTipsStatus": "i171"
+    },
+    {
+      "roundId": 385,
+      "roundName": "5. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 386,
+      "roundName": "6. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 387,
+      "roundName": "7. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 388,
+      "roundName": "8. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 401,
+      "roundName": "9. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 389,
+      "roundName": "10. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 390,
+      "roundName": "11. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 402,
+      "roundName": "12. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 391,
+      "roundName": "13. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 392,
+      "roundName": "14. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 403,
+      "roundName": "15. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 393,
+      "roundName": "16. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 404,
+      "roundName": "17. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    },
+    {
+      "roundId": 394,
+      "roundName": "18. kolo",
+      "canShow": false,
+      "roundStatus": {
+        "statusType": "HIDDEN",
+        "statusName": "Neotevřeno"
+      },
+      "actualRound": false
+    }
+  ],
+  "tipsToggle": {
+    "myTips": "Moje Tipovačka",
+    "championTips": "Hvězda soutěže"
+  },
+  "infoMessage": {
+    "message": "Natipovali jste výsledky zápasů a hrajete až o 250 000 goldenů.",
+    "icon": {
+      "code": "i170",
+      "type": "I_ICON"
+    },
+    "type": "INFO"
+  },
+  "canTip": true,
+  "roundMatches": [
+    {
+      "roundMatchId": 1721,
+      "status": "MATCH_ENDED",
+      "superSportName": "Fotbal - muži",
+      "sportIcon": {
+        "code": "ss16",
+        "type": "SUPER_SPORT"
+      },
+      "competitionName": "Česká Chance Liga",
+      "matchName": "Zbrojovka Brno - Slovan Liberec",
+      "matchDate": "2026-08-07T19:00:00.000+02:00",
+      "result": {
+        "resultFinal": "0:1",
+        "resultParts": "(0:0, 0:1)",
+        "home": "0",
+        "away": "1"
+      },
+      "matchId": 8288402,
+      "matchOdds": [
+        {
+          "oppsTab": [
+            {
+              "id": 2673608124,
+              "eventId": 2258956811,
+              "label": "1",
+              "type": "1",
+              "odd": 2.61,
+              "bettingEnabled": false,
+              "dateClosed": "2026-08-07T19:00:00.000+02:00"
+            },
+            {
+              "id": 2673608125,
+              "eventId": 2258956812,
+              "label": "10",
+              "type": "1x",
+              "odd": 1.49,
+              "bettingEnabled": false,
+              "dateClosed": "2026-08-07T19:00:00.000+02:00"
+            },
+            {
+              "id": 2673608122,
+              "eventId": 2258956811,
+              "label": "0",
+              "type": "x",
+              "odd": 3.34,
+              "bettingEnabled": false,
+              "dateClosed": "2026-08-07T19:00:00.000+02:00"
+            },
+            {
+              "id": 2673608127,
+              "eventId": 2258956812,
+              "label": "02",
+              "type": "x2",
+              "odd": 1.53,
+              "bettingEnabled": false,
+              "winning": true,
+              "dateClosed": "2026-08-07T19:00:00.000+02:00"
+            },
+            {
+              "id": 2673608123,
+              "eventId": 2258956811,
+              "label": "2",
+              "type": "2",
+              "odd": 2.75,
+              "bettingEnabled": false,
+              "winning": true,
+              "dateClosed": "2026-08-07T19:00:00.000+02:00"
+            }
+          ]
+        }
+      ],
+      "popularTips": {
+        "message": "Nejtipovanější výsledky:",
+        "firstPopularTip": {
+          "value": "1:1",
+          "percentage": 30
+        },
+        "secondPopularTip": {
+          "value": "2:1",
+          "percentage": 28,
+          "tippedByClient": true
+        },
+        "thirdPopularTip": {
+          "value": "1:2",
+          "percentage": 14
+        }
+      },
+      "connectToLiveScore": false,
+      "connectToLiveOdds": false
+    },
+    {
+      "roundMatchId": 1741,
+      "status": "MATCH_ENDED",
+      "superSportName": "Fotbal - muži",
+      "sportIcon": {
+        "code": "ss16",
+        "type": "SUPER_SPORT"
+      },
+      "competitionName": "Česká Chance Liga",
+      "matchName": "Teplice - Viktoria Plzeň",
+      "matchDate": "2026-08-08T17:00:00.000+02:00",
+      "result": {
+        "resultFinal": "5:5",
+        "resultParts": "(3:4, 2:1)",
+        "home": "5",
+        "away": "5"
+      },
+      "matchId": 8288407,
+      "matchOdds": [
+        {
+          "oppsTab": [
+            {
+              "id": 2673609768,
+              "eventId": 2258957481,
+              "label": "1",
+              "type": "1",
+              "odd": 4.38,
+              "bettingEnabled": false,
+              "dateClosed": "2026-08-08T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673609772,
+              "eventId": 2258957482,
+              "label": "10",
+              "type": "1x",
+              "odd": 2.03,
+              "bettingEnabled": false,
+              "winning": true,
+              "dateClosed": "2026-08-08T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673609767,
+              "eventId": 2258957481,
+              "label": "0",
+              "type": "x",
+              "odd": 3.69,
+              "bettingEnabled": false,
+              "winning": true,
+              "dateClosed": "2026-08-08T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673609771,
+              "eventId": 2258957482,
+              "label": "02",
+              "type": "x2",
+              "odd": 1.24,
+              "bettingEnabled": false,
+              "winning": true,
+              "dateClosed": "2026-08-08T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673609769,
+              "eventId": 2258957481,
+              "label": "2",
+              "type": "2",
+              "odd": 1.84,
+              "bettingEnabled": false,
+              "dateClosed": "2026-08-08T17:00:00.000+02:00"
+            }
+          ]
+        }
+      ],
+      "popularTips": {
+        "message": "Nejtipovanější výsledky:",
+        "firstPopularTip": {
+          "value": "1:2",
+          "percentage": 36
+        },
+        "secondPopularTip": {
+          "value": "0:2",
+          "percentage": 17
+        },
+        "thirdPopularTip": {
+          "value": "1:1",
+          "percentage": 15,
+          "tippedByClient": true
+        }
+      },
+      "connectToLiveScore": false,
+      "connectToLiveOdds": false
+    },
+    {
+      "roundMatchId": 1742,
+      "status": "MATCH_ENDED",
+      "superSportName": "Fotbal - muži",
+      "sportIcon": {
+        "code": "ss16",
+        "type": "SUPER_SPORT"
+      },
+      "competitionName": "Česká Chance Liga",
+      "matchName": "Zlín - Bohemians 1905",
+      "matchDate": "2026-08-08T17:00:00.000+02:00",
+      "result": {
+        "resultFinal": "0:2",
+        "resultParts": "(0:1, 0:1)",
+        "home": "0",
+        "away": "2"
+      },
+      "matchId": 8288408,
+      "matchOdds": [
+        {
+          "oppsTab": [
+            {
+              "id": 2673610985,
+              "eventId": 2258957904,
+              "label": "1",
+              "type": "1",
+              "odd": 2.61,
+              "bettingEnabled": false,
+              "dateClosed": "2026-08-08T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673610988,
+              "eventId": 2258957905,
+              "label": "10",
+              "type": "1x",
+              "odd": 1.46,
+              "bettingEnabled": false,
+              "dateClosed": "2026-08-08T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673610983,
+              "eventId": 2258957904,
+              "label": "0",
+              "type": "x",
+              "odd": 3.19,
+              "bettingEnabled": false,
+              "dateClosed": "2026-08-08T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673610986,
+              "eventId": 2258957905,
+              "label": "02",
+              "type": "x2",
+              "odd": 1.53,
+              "bettingEnabled": false,
+              "winning": true,
+              "dateClosed": "2026-08-08T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673610984,
+              "eventId": 2258957904,
+              "label": "2",
+              "type": "2",
+              "odd": 2.86,
+              "bettingEnabled": false,
+              "winning": true,
+              "dateClosed": "2026-08-08T17:00:00.000+02:00"
+            }
+          ]
+        }
+      ],
+      "popularTips": {
+        "message": "Nejtipovanější výsledky:",
+        "firstPopularTip": {
+          "value": "1:1",
+          "percentage": 40
+        },
+        "secondPopularTip": {
+          "value": "2:1",
+          "percentage": 13
+        },
+        "thirdPopularTip": {
+          "value": "1:0",
+          "percentage": 10
+        },
+        "clientTip": {
+          "value": "1:2",
+          "percentage": 9
+        }
+      },
+      "connectToLiveScore": false,
+      "connectToLiveOdds": false
+    },
+    {
+      "roundMatchId": 1743,
+      "status": "MATCH_PREMATCH",
+      "superSportName": "Fotbal - muži",
+      "sportIcon": {
+        "code": "ss16",
+        "type": "SUPER_SPORT"
+      },
+      "competitionName": "Česká Chance Liga",
+      "matchName": "Mladá Boleslav - Sparta Praha",
+      "matchDate": "2026-08-08T20:00:00.000+02:00",
+      "matchId": 8288405,
+      "matchOdds": [
+        {
+          "oppsTab": [
+            {
+              "id": 2673611784,
+              "eventId": 2258958201,
+              "label": "1",
+              "type": "1",
+              "odd": 3.66,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-08T20:00:00.000+02:00"
+            },
+            {
+              "id": 2673611787,
+              "eventId": 2258958202,
+              "label": "10",
+              "type": "1x",
+              "odd": 1.93,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-08T20:00:00.000+02:00"
+            },
+            {
+              "id": 2673611782,
+              "eventId": 2258958201,
+              "label": "0",
+              "type": "x",
+              "odd": 3.96,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-08T20:00:00.000+02:00"
+            },
+            {
+              "id": 2673611786,
+              "eventId": 2258958202,
+              "label": "02",
+              "type": "x2",
+              "odd": 1.31,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-08T20:00:00.000+02:00"
+            },
+            {
+              "id": 2673611783,
+              "eventId": 2258958201,
+              "label": "2",
+              "type": "2",
+              "odd": 1.93,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-08T20:00:00.000+02:00"
+            }
+          ]
+        }
+      ],
+      "popularTips": {
+        "message": "Nejtipovanější výsledky:",
+        "firstPopularTip": {
+          "value": "1:2",
+          "percentage": 32
+        },
+        "secondPopularTip": {
+          "value": "1:3",
+          "percentage": 24
+        },
+        "thirdPopularTip": {
+          "value": "0:2",
+          "percentage": 16,
+          "tippedByClient": true
+        }
+      },
+      "connectToLiveScore": true,
+      "connectToLiveOdds": false
+    },
+    {
+      "roundMatchId": 1744,
+      "status": "MATCH_PREMATCH",
+      "superSportName": "Fotbal - muži",
+      "sportIcon": {
+        "code": "ss16",
+        "type": "SUPER_SPORT"
+      },
+      "competitionName": "Česká Chance Liga",
+      "matchName": "Slavia Praha - Pardubice",
+      "matchDate": "2026-08-09T15:00:00.000+02:00",
+      "matchId": 8288406,
+      "matchOdds": [
+        {
+          "oppsTab": [
+            {
+              "id": 2673613630,
+              "eventId": 2258958864,
+              "label": "1",
+              "type": "1",
+              "odd": 1.22,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T15:00:00.000+02:00"
+            },
+            {
+              "id": 2673613633,
+              "eventId": 2258958865,
+              "label": "10",
+              "type": "1x",
+              "odd": 1.04,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T15:00:00.000+02:00"
+            },
+            {
+              "id": 2673613628,
+              "eventId": 2258958864,
+              "label": "0",
+              "type": "x",
+              "odd": 6.44,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T15:00:00.000+02:00"
+            },
+            {
+              "id": 2673613632,
+              "eventId": 2258958865,
+              "label": "02",
+              "type": "x2",
+              "odd": 4.48,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T15:00:00.000+02:00"
+            },
+            {
+              "id": 2673613629,
+              "eventId": 2258958864,
+              "label": "2",
+              "type": "2",
+              "odd": 13.2,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T15:00:00.000+02:00"
+            }
+          ]
+        }
+      ],
+      "popularTips": {
+        "message": "Nejtipovanější výsledky:",
+        "firstPopularTip": {
+          "value": "3:0",
+          "percentage": 36
+        },
+        "secondPopularTip": {
+          "value": "3:1",
+          "percentage": 17
+        },
+        "thirdPopularTip": {
+          "value": "4:0",
+          "percentage": 16,
+          "tippedByClient": true
+        }
+      },
+      "connectToLiveScore": false,
+      "connectToLiveOdds": false
+    },
+    {
+      "roundMatchId": 1745,
+      "status": "MATCH_PREMATCH",
+      "superSportName": "Fotbal - muži",
+      "sportIcon": {
+        "code": "ss16",
+        "type": "SUPER_SPORT"
+      },
+      "competitionName": "Česká Chance Liga",
+      "matchName": "Hradec Králové - Baník Ostrava",
+      "matchDate": "2026-08-09T17:00:00.000+02:00",
+      "matchId": 8288403,
+      "matchOdds": [
+        {
+          "oppsTab": [
+            {
+              "id": 2673615449,
+              "eventId": 2258959567,
+              "label": "1",
+              "type": "1",
+              "odd": 2.24,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673615452,
+              "eventId": 2258959568,
+              "label": "10",
+              "type": "1x",
+              "odd": 1.35,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673615448,
+              "eventId": 2258959567,
+              "label": "0",
+              "type": "x",
+              "odd": 3.32,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673615450,
+              "eventId": 2258959568,
+              "label": "02",
+              "type": "x2",
+              "odd": 1.7,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673615447,
+              "eventId": 2258959567,
+              "label": "2",
+              "type": "2",
+              "odd": 3.36,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T17:00:00.000+02:00"
+            }
+          ]
+        }
+      ],
+      "popularTips": {
+        "message": "Nejtipovanější výsledky:",
+        "firstPopularTip": {
+          "value": "2:1",
+          "percentage": 31
+        },
+        "secondPopularTip": {
+          "value": "1:1",
+          "percentage": 24
+        },
+        "thirdPopularTip": {
+          "value": "2:0",
+          "percentage": 10
+        },
+        "clientTip": {
+          "value": "3:1",
+          "percentage": 3
+        }
+      },
+      "connectToLiveScore": false,
+      "connectToLiveOdds": false
+    },
+    {
+      "roundMatchId": 1746,
+      "status": "MATCH_PREMATCH",
+      "superSportName": "Fotbal - muži",
+      "sportIcon": {
+        "code": "ss16",
+        "type": "SUPER_SPORT"
+      },
+      "competitionName": "Česká Chance Liga",
+      "matchName": "Jablonec - Slovácko",
+      "matchDate": "2026-08-09T17:00:00.000+02:00",
+      "matchId": 8288404,
+      "matchOdds": [
+        {
+          "oppsTab": [
+            {
+              "id": 2673616147,
+              "eventId": 2258959826,
+              "label": "1",
+              "type": "1",
+              "odd": 1.69,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673616150,
+              "eventId": 2258959827,
+              "label": "10",
+              "type": "1x",
+              "odd": 1.18,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673616148,
+              "eventId": 2258959826,
+              "label": "0",
+              "type": "x",
+              "odd": 3.78,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673616151,
+              "eventId": 2258959827,
+              "label": "02",
+              "type": "x2",
+              "odd": 2.24,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T17:00:00.000+02:00"
+            },
+            {
+              "id": 2673616149,
+              "eventId": 2258959826,
+              "label": "2",
+              "type": "2",
+              "odd": 5.27,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T17:00:00.000+02:00"
+            }
+          ]
+        }
+      ],
+      "popularTips": {
+        "message": "Nejtipovanější výsledky:",
+        "firstPopularTip": {
+          "value": "2:0",
+          "percentage": 39
+        },
+        "secondPopularTip": {
+          "value": "2:1",
+          "percentage": 24,
+          "tippedByClient": true
+        },
+        "thirdPopularTip": {
+          "value": "3:1",
+          "percentage": 12
+        }
+      },
+      "connectToLiveScore": false,
+      "connectToLiveOdds": false
+    },
+    {
+      "roundMatchId": 1747,
+      "status": "MATCH_PREMATCH",
+      "superSportName": "Fotbal - muži",
+      "sportIcon": {
+        "code": "ss16",
+        "type": "SUPER_SPORT"
+      },
+      "competitionName": "Česká Chance Liga",
+      "matchName": "Artis Brno - Sigma Olomouc",
+      "matchDate": "2026-08-09T20:00:00.000+02:00",
+      "matchId": 8288401,
+      "matchOdds": [
+        {
+          "oppsTab": [
+            {
+              "id": 2673617796,
+              "eventId": 2258960468,
+              "label": "1",
+              "type": "1",
+              "odd": 5.03,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T20:00:00.000+02:00"
+            },
+            {
+              "id": 2673617798,
+              "eventId": 2258960469,
+              "label": "10",
+              "type": "1x",
+              "odd": 2.24,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T20:00:00.000+02:00"
+            },
+            {
+              "id": 2673617795,
+              "eventId": 2258960468,
+              "label": "0",
+              "type": "x",
+              "odd": 3.92,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T20:00:00.000+02:00"
+            },
+            {
+              "id": 2673617799,
+              "eventId": 2258960469,
+              "label": "02",
+              "type": "x2",
+              "odd": 1.19,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T20:00:00.000+02:00"
+            },
+            {
+              "id": 2673617794,
+              "eventId": 2258960468,
+              "label": "2",
+              "type": "2",
+              "odd": 1.69,
+              "bettingEnabled": true,
+              "dateClosed": "2026-08-09T20:00:00.000+02:00"
+            }
+          ]
+        }
+      ],
+      "popularTips": {
+        "message": "Nejtipovanější výsledky:",
+        "firstPopularTip": {
+          "value": "1:2",
+          "percentage": 35
+        },
+        "secondPopularTip": {
+          "value": "0:2",
+          "percentage": 18,
+          "tippedByClient": true
+        },
+        "thirdPopularTip": {
+          "value": "1:3",
+          "percentage": 14
+        }
+      },
+      "connectToLiveScore": false,
+      "connectToLiveOdds": false
+    }
+  ],
+  "tips": {
+    "client": {
+      "playing": true,
+      "totalScoreText": "10 bodů",
+      "totalScore": 10,
+      "tips": [
+        {
+          "roundMatchId": 1721,
+          "firstParticipantTip": 2,
+          "secondParticipantTip": 1,
+          "score": 0,
+          "jokerUsed": false
+        },
+        {
+          "roundMatchId": 1741,
+          "firstParticipantTip": 1,
+          "secondParticipantTip": 1,
+          "score": 6,
+          "jokerUsed": false
+        },
+        {
+          "roundMatchId": 1742,
+          "firstParticipantTip": 1,
+          "secondParticipantTip": 2,
+          "score": 4,
+          "jokerUsed": false
+        },
+        {
+          "roundMatchId": 1743,
+          "firstParticipantTip": 0,
+          "secondParticipantTip": 2,
+          "score": 0,
+          "jokerUsed": false
+        },
+        {
+          "roundMatchId": 1744,
+          "firstParticipantTip": 4,
+          "secondParticipantTip": 0,
+          "score": 0,
+          "jokerUsed": true
+        },
+        {
+          "roundMatchId": 1745,
+          "firstParticipantTip": 3,
+          "secondParticipantTip": 1,
+          "score": 0,
+          "jokerUsed": false
+        },
+        {
+          "roundMatchId": 1746,
+          "firstParticipantTip": 2,
+          "secondParticipantTip": 1,
+          "score": 0,
+          "jokerUsed": false
+        },
+        {
+          "roundMatchId": 1747,
+          "firstParticipantTip": 0,
+          "secondParticipantTip": 2,
+          "score": 0,
+          "jokerUsed": false
+        }
+      ]
+    },
+    "allTippedByClient": true
+  },
+  "freeJoker": false,
+  "showJokerModal": false,
+  "jokerIcon": {
+    "code": "i612",
+    "type": "I_ICON"
+  },
+  "jokerType": "DOUBLE",
+  "jokerCount": 1
+}

@@ -139,6 +139,154 @@ def _default_chunk_size(universes: int, crowd_players: int) -> int:
     return min(2_000, universes)
 
 
+@dataclass(frozen=True)
+class SampledUniverses:
+    """Fixed RNG outcomes + crowd for fast re-scoring of many lineups."""
+
+    outcomes: np.ndarray
+    crowd_scores: np.ndarray
+    points_lut: np.ndarray
+    universes: int
+    crowd_players: int
+
+
+def sample_simulation_universes(
+    p_probs: np.ndarray,
+    c_probs: np.ndarray,
+    *,
+    universes: int,
+    crowd_players: int,
+    seed: int | None = None,
+    progress: ProgressCallback | None = None,
+    universe_chunk: int | None = None,
+) -> SampledUniverses:
+    """Draw truth outcomes and crowd scores once (common random numbers)."""
+    if universes <= 0:
+        raise ValueError("universes must be positive")
+    if crowd_players <= 0:
+        raise ValueError("crowd_players must be positive")
+
+    rng = np.random.default_rng(seed)
+    lut = build_points_lut()
+    match_count = p_probs.shape[0]
+    chunk_size = universe_chunk or _default_chunk_size(universes, crowd_players)
+
+    outcomes_all = np.empty((universes, match_count), dtype=np.int16)
+    crowd_scores_all = np.empty((universes, crowd_players), dtype=np.int32)
+
+    progress_every = max(1, universes // 50)
+    completed = 0
+
+    while completed < universes:
+        batch = min(chunk_size, universes - completed)
+        batch_outcomes = np.empty((batch, match_count), dtype=np.int16)
+        for match_idx in range(match_count):
+            batch_outcomes[:, match_idx] = rng.choice(
+                _FLAT,
+                size=batch,
+                p=p_probs[match_idx],
+            )
+
+        crowd_tips = np.empty((batch, crowd_players, match_count), dtype=np.int16)
+        for match_idx in range(match_count):
+            crowd_tips[:, :, match_idx] = rng.choice(
+                _FLAT,
+                size=(batch, crowd_players),
+                p=c_probs[match_idx],
+            )
+
+        outcomes_bc = batch_outcomes[:, np.newaxis, :]
+        crowd_points = lut[crowd_tips, outcomes_bc]
+        crowd_scores_all[completed : completed + batch] = crowd_points.sum(axis=2, dtype=np.int32)
+        outcomes_all[completed : completed + batch] = batch_outcomes
+
+        completed += batch
+        if progress is not None and (
+            completed % progress_every == 0 or completed == universes
+        ):
+            progress(completed, universes)
+
+    return SampledUniverses(
+        outcomes=outcomes_all,
+        crowd_scores=crowd_scores_all,
+        points_lut=lut,
+        universes=universes,
+        crowd_players=crowd_players,
+    )
+
+
+def score_agents_on_sampled(
+    sampled: SampledUniverses,
+    *,
+    agent_tip_flat: np.ndarray,
+    joker_mult: np.ndarray,
+    agent_names: tuple[str, ...],
+) -> tuple[VectorizedAgentStats, ...]:
+    """Score agents on pre-sampled universes (no RNG)."""
+    universes = sampled.universes
+    crowd_players = sampled.crowd_players
+    lut = sampled.points_lut
+    outcomes = sampled.outcomes
+    crowd_scores = sampled.crowd_scores
+    agent_count = agent_tip_flat.shape[0]
+
+    top10_threshold = 1.0 - (10.0 / crowd_players)
+    top100_threshold = 1.0 - (100.0 / crowd_players)
+    top1000_threshold = 1.0 - (1000.0 / crowd_players)
+
+    point_totals = np.zeros(agent_count, dtype=np.float64)
+    win_totals = np.zeros(agent_count, dtype=np.float64)
+    top10_totals = np.zeros(agent_count, dtype=np.float64)
+    top100_totals = np.zeros(agent_count, dtype=np.float64)
+    top1000_totals = np.zeros(agent_count, dtype=np.float64)
+
+    chunk_size = _default_chunk_size(universes, crowd_players)
+    completed = 0
+    while completed < universes:
+        batch = min(chunk_size, universes - completed)
+        batch_outcomes = outcomes[completed : completed + batch]
+        batch_crowd = crowd_scores[completed : completed + batch]
+
+        outcomes_bc = batch_outcomes[:, np.newaxis, :]
+        agent_points = lut[agent_tip_flat, outcomes_bc]
+        agent_points *= joker_mult
+        agent_scores = agent_points.sum(axis=2, dtype=np.int32)
+
+        crowd_max = batch_crowd.max(axis=1)
+        tied_crowd = (batch_crowd == crowd_max[:, np.newaxis]).sum(axis=1)
+        win_share = np.where(
+            agent_scores > crowd_max[:, np.newaxis],
+            1.0,
+            np.where(
+                agent_scores < crowd_max[:, np.newaxis],
+                0.0,
+                1.0 / (tied_crowd + 1)[:, np.newaxis],
+            ),
+        )
+
+        better = (batch_crowd[:, np.newaxis, :] > agent_scores[:, :, np.newaxis]).sum(axis=2)
+        rank = 1.0 - (better / crowd_players)
+
+        point_totals += agent_scores.sum(axis=0)
+        win_totals += win_share.sum(axis=0)
+        top10_totals += (rank >= top10_threshold).sum(axis=0)
+        top100_totals += (rank >= top100_threshold).sum(axis=0)
+        top1000_totals += (rank >= top1000_threshold).sum(axis=0)
+        completed += batch
+
+    return tuple(
+        VectorizedAgentStats(
+            name=agent_names[agent_idx],
+            mean_points=point_totals[agent_idx] / universes,
+            p_win=win_totals[agent_idx] / universes,
+            p_top_10=top10_totals[agent_idx] / universes,
+            p_top_100=top100_totals[agent_idx] / universes,
+            p_top_1000=top1000_totals[agent_idx] / universes,
+        )
+        for agent_idx in range(agent_count)
+    )
+
+
 def run_simulation_vectorized(
     prepared: PreparedSimulation,
     *,
@@ -154,89 +302,20 @@ def run_simulation_vectorized(
     if crowd_players <= 0:
         raise ValueError("crowd_players must be positive")
 
-    rng = np.random.default_rng(seed)
-    lut = prepared.points_lut
-    match_count = prepared.p_probs.shape[0]
-    agent_count = prepared.agent_tip_flat.shape[0]
-    chunk_size = universe_chunk or _default_chunk_size(universes, crowd_players)
-
-    point_totals = np.zeros(agent_count, dtype=np.float64)
-    win_totals = np.zeros(agent_count, dtype=np.float64)
-    top10_totals = np.zeros(agent_count, dtype=np.float64)
-    top100_totals = np.zeros(agent_count, dtype=np.float64)
-    top1000_totals = np.zeros(agent_count, dtype=np.float64)
-
-    top10_threshold = 1.0 - (10.0 / crowd_players)
-    top100_threshold = 1.0 - (100.0 / crowd_players)
-    top1000_threshold = 1.0 - (1000.0 / crowd_players)
-
-    progress_every = max(1, universes // 50)
-    completed = 0
-
-    while completed < universes:
-        batch = min(chunk_size, universes - completed)
-
-        outcomes = np.empty((batch, match_count), dtype=np.int16)
-        for match_idx in range(match_count):
-            outcomes[:, match_idx] = rng.choice(
-                _FLAT,
-                size=batch,
-                p=prepared.p_probs[match_idx],
-            )
-
-        crowd_tips = np.empty((batch, crowd_players, match_count), dtype=np.int16)
-        for match_idx in range(match_count):
-            crowd_tips[:, :, match_idx] = rng.choice(
-                _FLAT,
-                size=(batch, crowd_players),
-                p=prepared.c_probs[match_idx],
-            )
-
-        outcomes_bc = outcomes[:, np.newaxis, :]
-        crowd_points = lut[crowd_tips, outcomes_bc]
-        crowd_scores = crowd_points.sum(axis=2, dtype=np.int32)
-
-        agent_points = lut[prepared.agent_tip_flat, outcomes_bc]
-        agent_points *= prepared.joker_mult
-        agent_scores = agent_points.sum(axis=2, dtype=np.int32)
-
-        crowd_max = crowd_scores.max(axis=1)
-        tied_crowd = (crowd_scores == crowd_max[:, np.newaxis]).sum(axis=1)
-        win_share = np.where(
-            agent_scores > crowd_max[:, np.newaxis],
-            1.0,
-            np.where(
-                agent_scores < crowd_max[:, np.newaxis],
-                0.0,
-                1.0 / (tied_crowd + 1)[:, np.newaxis],
-            ),
-        )
-
-        better = (crowd_scores[:, np.newaxis, :] > agent_scores[:, :, np.newaxis]).sum(axis=2)
-        rank = 1.0 - (better / crowd_players)
-
-        point_totals += agent_scores.sum(axis=0)
-        win_totals += win_share.sum(axis=0)
-        top10_totals += (rank >= top10_threshold).sum(axis=0)
-        top100_totals += (rank >= top100_threshold).sum(axis=0)
-        top1000_totals += (rank >= top1000_threshold).sum(axis=0)
-
-        completed += batch
-        if progress is not None and (
-            completed % progress_every == 0 or completed == universes
-        ):
-            progress(completed, universes)
-
-    stats = tuple(
-        VectorizedAgentStats(
-            name=prepared.agent_names[agent_idx],
-            mean_points=point_totals[agent_idx] / universes,
-            p_win=win_totals[agent_idx] / universes,
-            p_top_10=top10_totals[agent_idx] / universes,
-            p_top_100=top100_totals[agent_idx] / universes,
-            p_top_1000=top1000_totals[agent_idx] / universes,
-        )
-        for agent_idx in range(agent_count)
+    sampled = sample_simulation_universes(
+        prepared.p_probs,
+        prepared.c_probs,
+        universes=universes,
+        crowd_players=crowd_players,
+        seed=seed,
+        progress=progress,
+        universe_chunk=universe_chunk,
+    )
+    stats = score_agents_on_sampled(
+        sampled,
+        agent_tip_flat=prepared.agent_tip_flat,
+        joker_mult=prepared.joker_mult,
+        agent_names=prepared.agent_names,
     )
     return VectorizedSimulationResult(
         universes=universes,

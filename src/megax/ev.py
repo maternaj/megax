@@ -4,8 +4,32 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from megax.crowd_observed import DISPLAY_MAX_GOALS
 from megax.probability import ScoreMatrixResult
 from megax.scoring import points
+
+
+@dataclass(frozen=True)
+class PointsDistribution:
+    p10: float
+    p6: float
+    p4: float
+    p2: float
+    p0: float
+
+    def fmt_compact(self, *, min_pct: float = 0.5) -> str:
+        parts: list[str] = []
+        for pts, share in (
+            (10, self.p10),
+            (6, self.p6),
+            (4, self.p4),
+            (2, self.p2),
+            (0, self.p0),
+        ):
+            pct = share * 100.0
+            if pct >= min_pct:
+                parts.append(f"{pts}:{pct:.0f}%")
+        return " · ".join(parts) if parts else "—"
 
 
 @dataclass(frozen=True)
@@ -64,6 +88,34 @@ def expected_points(
                 continue
             total += prob * points(tip_home, tip_away, actual_home, actual_away)
     return total
+
+
+def tip_points_distribution(
+    matrix: ScoreMatrixResult | tuple[tuple[float, ...], ...],
+    tip_home: int,
+    tip_away: int,
+    *,
+    max_goals: int | None = DISPLAY_MAX_GOALS,
+) -> PointsDistribution:
+    """Probability of scoring 10 / 6 / 4 / 2 / 0 points for a fixed tip."""
+    grid = matrix.matrix if isinstance(matrix, ScoreMatrixResult) else matrix
+    size = len(grid)
+    limit = size if max_goals is None else min(max_goals + 1, size)
+    buckets = {10: 0.0, 6: 0.0, 4: 0.0, 2: 0.0, 0: 0.0}
+    for actual_home in range(limit):
+        for actual_away in range(limit):
+            prob = grid[actual_home][actual_away]
+            if prob <= 0.0:
+                continue
+            pts = points(tip_home, tip_away, actual_home, actual_away)
+            buckets[pts] += prob
+    return PointsDistribution(
+        p10=buckets[10],
+        p6=buckets[6],
+        p4=buckets[4],
+        p2=buckets[2],
+        p0=buckets[0],
+    )
 
 
 def iter_tip_candidates(

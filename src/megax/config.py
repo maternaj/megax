@@ -5,11 +5,15 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 from dotenv import load_dotenv
 
+from megax.bookmaker.client import BookmakerClient
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STATE_DIR = PROJECT_ROOT / "state"
+BookmakerBrand = Literal["tipsport", "chance"]
 
 
 @dataclass(frozen=True)
@@ -17,6 +21,18 @@ class MegaxConfig:
     tipsport_base_url: str
     tipsport_competition_id: int
     tipsport_state_file: str
+    tipsport_username: str | None
+    tipsport_password: str | None
+    chance_base_url: str
+    chance_state_file: str
+    chance_username: str | None
+    chance_password: str | None
+    megatip_contest_id: int
+    megatip_tile_id: int
+    megatip_serie_id: int
+    megatip_round_id_offset: int
+    megatip_max_score: int
+    megatip_probe_delay_sec: float
     max_matches_per_round: int
     results_poll_interval_sec: float
     results_poll_min_after_kickoff_minutes: int
@@ -41,14 +57,30 @@ def load_config(*, env_file: str | Path | None = None) -> MegaxConfig:
         load_dotenv(PROJECT_ROOT / ".env")
 
     state_dir = os.getenv("MEGAX_STATE_DIR", str(DEFAULT_STATE_DIR))
-    state_file = os.getenv(
+    tipsport_state = os.getenv(
         "MEGAX_TIPSPORT_STATE_FILE",
         str(Path(state_dir) / "tipsport_scraper_state.json"),
+    )
+    chance_state = os.getenv(
+        "MEGAX_CHANCE_STATE_FILE",
+        str(Path(state_dir) / "chance_scraper_state.json"),
     )
     return MegaxConfig(
         tipsport_base_url=os.getenv("MEGAX_TIPSPORT_BASE_URL", "https://www.tipsport.cz").rstrip("/"),
         tipsport_competition_id=int(os.getenv("MEGAX_TIPSPORT_COMPETITION_ID", "120")),
-        tipsport_state_file=state_file,
+        tipsport_state_file=tipsport_state,
+        tipsport_username=_optional_str(os.getenv("MEGAX_TIPSPORT_USERNAME")),
+        tipsport_password=_optional_str(os.getenv("MEGAX_TIPSPORT_PASSWORD")),
+        chance_base_url=os.getenv("MEGAX_CHANCE_BASE_URL", "https://www.chance.cz").rstrip("/"),
+        chance_state_file=chance_state,
+        chance_username=_optional_str(os.getenv("MEGAX_CHANCE_USERNAME")),
+        chance_password=_optional_str(os.getenv("MEGAX_CHANCE_PASSWORD")),
+        megatip_contest_id=int(os.getenv("MEGAX_MEGATIP_CONTEST_ID", "161")),
+        megatip_tile_id=int(os.getenv("MEGAX_MEGATIP_TILE_ID", "3575")),
+        megatip_serie_id=int(os.getenv("MEGAX_MEGATIP_SERIE_ID", "141")),
+        megatip_round_id_offset=int(os.getenv("MEGAX_MEGATIP_ROUND_ID_OFFSET", "380")),
+        megatip_max_score=int(os.getenv("MEGAX_MEGATIP_MAX_SCORE", "5")),
+        megatip_probe_delay_sec=float(os.getenv("MEGAX_MEGATIP_PROBE_DELAY_SEC", "0.3")),
         max_matches_per_round=int(os.getenv("MEGAX_MAX_MATCHES_PER_ROUND", "10")),
         results_poll_interval_sec=float(os.getenv("MEGAX_RESULTS_POLL_INTERVAL_SEC", "60")),
         results_poll_min_after_kickoff_minutes=int(
@@ -67,6 +99,29 @@ def load_config(*, env_file: str | Path | None = None) -> MegaxConfig:
         swap_protect_ev_ratio=float(os.getenv("MEGAX_SWAP_PROTECT_EV_RATIO", "0.95")),
         swap_chase_ev_ratio=float(os.getenv("MEGAX_SWAP_CHASE_EV_RATIO", "0.85")),
     )
+
+
+def bookmaker_client(config: MegaxConfig, brand: BookmakerBrand) -> BookmakerClient:
+    if brand == "tipsport":
+        return BookmakerClient(
+            config.tipsport_base_url,
+            state_file=config.tipsport_state_file,
+            username=config.tipsport_username,
+            password=config.tipsport_password,
+        )
+    return BookmakerClient(
+        config.chance_base_url,
+        state_file=config.chance_state_file,
+        username=config.chance_username,
+        password=config.chance_password,
+        require_login=True,
+    )
+
+
+def _optional_str(raw: str | None) -> str | None:
+    if raw is None or raw.strip() == "":
+        return None
+    return raw
 
 
 def _optional_float(raw: str | None) -> float | None:

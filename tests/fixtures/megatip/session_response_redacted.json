@@ -1,0 +1,49 @@
+{
+  "client": {
+    "id": 14678767,
+    "username": "jmat3236",
+    "email": "jiri.materna@gmail.com"
+  },
+  "firstLogin": false,
+  "registrationProgress": {
+    "type": "cz",
+    "completedPersonalData": true,
+    "registrationState": "BIG_REGISTRATION",
+    "previousRegistrationState": "PRE_REGISTRATION",
+    "gdprInfo": false,
+    "gdprMessage": "Aktualizovali jsme Zásady ochrany osobních údajů v souvislosti se změnami: okruh příjemců OÚ, soutěže, doba uchování elektronické komunikace.",
+    "amlChecked": true,
+    "usernameChangeAllowed": true,
+    "completedSelfRestriction": true,
+    "waitingForDepositPaymentChannel": false,
+    "waitingForVerifiedPaymentChannel": false,
+    "waitingForAcceptedPaymentChannel": false,
+    "hasAcceptedPaymentChannel": true,
+    "client2018Betting": false,
+    "robCheckState": "CHECKED",
+    "robCheckStateEligibleForBigRegistration": true,
+    "showChangePassword": false,
+    "rvoCheckStatus": "NOT_IN_RVO",
+    "notInRvo": true,
+    "continueRegistrationGateway": false,
+    "hasAcceptedVopAndEula": true,
+    "showModalDialogToCompleteNecessaryData": false,
+    "showAlertRobFailed": false,
+    "showAlertToCompleteNecessaryData": false,
+    "showAlertWaitingDepositToPaymentChannel": false,
+    "showAlertWaitingForVerifiedPaymentChannel": false,
+    "showAlertWaitingForAcceptedPaymentChannel": false
+  },
+  "sessionUuid": "5346ee5d-6fa8-455d-bea0-300fff00010d",
+  "consents": {
+    "zekId": "T2wXc7a49IHza1OEtgsJ_Za_T0LjM-Xj031Vo2N0Ads",
+    "targeting": true,
+    "performance": true,
+    "timestamp": 1785478835000
+  },
+  "selfRestrictionStats": {
+    "setCount": 0,
+    "totalCount": 11
+  },
+  "mfaActive": false
+}

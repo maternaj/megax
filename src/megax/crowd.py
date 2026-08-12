@@ -37,6 +37,8 @@ class CrowdMatrixResult:
     over_share: float | None
     source: str
     note: str
+    known: tuple[tuple[bool, ...], ...] | None = None
+    estimated: tuple[tuple[bool, ...], ...] | None = None
 
 
 def _normalize_triple(home: float, draw: float, away: float) -> tuple[float, float, float] | None:

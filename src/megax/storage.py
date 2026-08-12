@@ -13,7 +13,7 @@ from megax.gui.state import RoundGuiState
 from megax.team_mu import TeamOuLine
 from megax.tipsport.offer import MatchOdds, MegaxMatch
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 def rounds_data_dir() -> Path:
@@ -22,6 +22,14 @@ def rounds_data_dir() -> Path:
 
 def round_record_path(round_key: str) -> Path:
     return rounds_data_dir() / f"{round_key}.json"
+
+
+def round_storage_key(round_id: int) -> str:
+    return f"round_{round_id}"
+
+
+def load_round_record_by_id(round_id: int) -> RoundRecord | None:
+    return load_round_record(round_storage_key(round_id))
 
 
 def _iso(dt: datetime | None) -> str | None:

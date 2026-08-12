@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from megax.config import load_config
-from megax.crowd import CrowdMatrixResult, build_crowd_matrix
-from megax.gui.state import RoundGuiState, parse_tip_score
+from megax.crowd import CrowdMatrixResult
+from megax.crowd_observed import CROWD_GRID_SIZE, build_crowd_matrix_from_observed
+from megax.gui.state import RoundGuiState
 from megax.ingest import RoundSnapshot, fetch_round_snapshot
 from megax.poll import poll_once
 from megax.probability import ScoreMatrixResult, build_score_matrix_from_match
@@ -15,9 +15,8 @@ from megax.scoring import points
 from megax.storage import RoundRecord, load_round_record, save_round_record
 from megax.tipsport.client import TipsportClient
 from megax.tipsport.offer import MegaxMatch, group_by_kickoff_slot
-from megax.calibrate import build_lineup_for_knobs, knobs_from_snapshot
-from megax.lineup import MatchLineupContext, RoundLineup, build_round_lineup
-from megax.swap import SwapRecommendation, compute_swap_recommendation
+from megax.lineup import MatchLineupContext, RoundLineup
+from megax.swap import SwapRecommendation
 from megax.tipsport.results import MatchResult, MatchStatus
 from megax.utility import MatchTipAnalysis, compute_match_analysis
 
@@ -54,6 +53,7 @@ class RoundView:
     swap: SwapRecommendation | None = None
     read_only: bool = False
     saved_at: datetime | None = None
+    round_id: int | None = None
 
 
 def _score_tip(
@@ -103,6 +103,7 @@ def build_round_view(
     client: TipsportClient | None = None,
     read_only: bool = False,
     saved_at: datetime | None = None,
+    round_id: int | None = None,
 ) -> RoundView:
     if snapshot is None:
         snapshot = fetch_round_snapshot(
@@ -115,22 +116,36 @@ def build_round_view(
 
     if results is None and snapshot.matches and not read_only:
         kickoffs = _match_kickoffs(snapshot.matches)
-        poll = poll_once(
-            [match.match_id for match in snapshot.matches],
-            kickoffs=kickoffs,
-            client=client,
-        )
-        results = poll.results
-        results_polled_at = poll.polled_at
+        pollable_ids = [
+            match.match_id for match in snapshot.matches if match.odds.home > 0
+        ]
+        if pollable_ids:
+            poll = poll_once(
+                pollable_ids,
+                kickoffs={mid: kickoffs[mid] for mid in pollable_ids},
+                client=client,
+            )
+            results = poll.results
+            results_polled_at = poll.polled_at
+        else:
+            results = {}
+            results_polled_at = None
     elif results is None and snapshot.matches and read_only and client is not None:
         kickoffs = _match_kickoffs(snapshot.matches)
-        poll = poll_once(
-            [match.match_id for match in snapshot.matches],
-            kickoffs=kickoffs,
-            client=client,
-        )
-        results = poll.results
-        results_polled_at = poll.polled_at
+        pollable_ids = [
+            match.match_id for match in snapshot.matches if match.odds.home > 0
+        ]
+        if pollable_ids:
+            poll = poll_once(
+                pollable_ids,
+                kickoffs={mid: kickoffs[mid] for mid in pollable_ids},
+                client=client,
+            )
+            results = poll.results
+            results_polled_at = poll.polled_at
+        else:
+            results = {}
+            results_polled_at = None
     else:
         results_polled_at = datetime.now(timezone.utc) if results else None
 
@@ -138,14 +153,6 @@ def build_round_view(
     totals_b = 0
     finished_count = 0
     slot_views: list[SlotView] = []
-    config = load_config()
-    crowd_blend_to_p = config.crowd_blend_to_p
-    crowd_tail_gamma = config.crowd_tail_gamma
-    crowd_zero_zero_delta = config.crowd_zero_zero_delta
-    crowd_prelec_alpha = config.crowd_prelec_alpha
-    crowd_zero_zero_min = config.crowd_zero_zero_min
-    gpp_alpha = config.gpp_alpha
-
     lineup_contexts: list[MatchLineupContext] = []
 
     for slot in snapshot.slots:
@@ -168,27 +175,32 @@ def build_round_view(
                 totals_b += pts_b
 
             prob = build_score_matrix_from_match(match)
+            state.seed_crowd_from_megatip(match.match_id)
             crowd = (
-                build_crowd_matrix(
-                    prob,
-                    state.money[str(match.match_id)],
-                    blend_to_p=crowd_blend_to_p,
-                    tail_gamma=crowd_tail_gamma,
-                    zero_zero_delta=crowd_zero_zero_delta,
-                    prelec_alpha=crowd_prelec_alpha,
-                    zero_zero_min=crowd_zero_zero_min,
+                build_crowd_matrix_from_observed(
+                    state.crowd_cells_for_match(match.match_id),
+                    grid_size=CROWD_GRID_SIZE,
+                    prob=prob,
+                    top3_keys=state.top3_cell_keys(match.match_id),
                 )
                 if prob
                 else None
             )
 
-            if prob and crowd:
-                analysis = compute_match_analysis(
-                    prob,
-                    crowd,
-                    field_size=state.field_size,
-                    gpp_alpha=gpp_alpha,
-                )
+            analysis = None
+            if prob and crowd and (
+                (crowd.known and any(any(row) for row in crowd.known))
+                or (crowd.estimated and any(any(row) for row in crowd.estimated))
+            ):
+                try:
+                    analysis = compute_match_analysis(
+                        prob,
+                        crowd,
+                        field_size=state.field_size,
+                    )
+                except ValueError:
+                    analysis = None
+            if analysis is not None:
                 lineup_contexts.append(
                     MatchLineupContext(
                         match_id=match.match_id,
@@ -197,7 +209,7 @@ def build_round_view(
                     )
                 )
             else:
-                analysis = None
+                pass
 
             rows.append(
                 MatchRow(
@@ -212,28 +224,6 @@ def build_round_view(
             )
         slot_views.append(SlotView(kickoff_at=slot.kickoff_at, matches=tuple(rows)))
 
-    lineup = None
-    if lineup_contexts and len(lineup_contexts) == len(snapshot.matches):
-        if state.calibration is not None:
-            lineup = build_lineup_for_knobs(
-                snapshot.matches,
-                state,
-                knobs_from_snapshot(state.calibration),
-                config=config,
-            )
-        if lineup is None:
-            lineup = build_round_lineup(tuple(lineup_contexts))
-
-    swap = None
-    if not read_only and lineup_contexts and len(lineup_contexts) == len(snapshot.matches):
-        swap = compute_swap_recommendation(
-            snapshot=snapshot,
-            state=state,
-            contexts=tuple(lineup_contexts),
-            results=results or {},
-            megax_config=config,
-        )
-
     return RoundView(
         snapshot=snapshot,
         round_key=round_key,
@@ -244,8 +234,9 @@ def build_round_view(
         totals_a=totals_a,
         totals_b=totals_b,
         finished_count=finished_count,
-        lineup=lineup,
-        swap=swap,
+        lineup=None,
+        swap=None,
         read_only=read_only,
         saved_at=saved_at,
+        round_id=round_id or state.round_id,
     )

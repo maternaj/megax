@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from megax.gui.state import RoundGuiState
+from tests.crowd_fixtures import apply_sample_crowd
 from megax.lineup import build_round_lineup
 from megax.simulate import (
     SimulationConfig,
@@ -52,11 +53,7 @@ def test_run_simulation_produces_stats(tmp_path, monkeypatch) -> None:
     match = _plzen_match()
     state = RoundGuiState(field_size=5_000)
     state.ensure_match(match.match_id)
-    state.money[str(match.match_id)] = {
-        "tipsport": {"home": 70, "draw": 15, "away": 15, "over": 50, "under": 50},
-        "fortuna": {"home": 75, "draw": 10, "away": 15, "over": 55, "under": 45},
-        "sazkabet": {"home": 72, "draw": 12, "away": 16, "over": 52, "under": 48},
-    }
+    apply_sample_crowd(state, match.match_id)
     record = RoundRecord(
         round_key="test-round",
         state=state,
@@ -85,11 +82,7 @@ def test_run_simulation_reports_progress(tmp_path, monkeypatch) -> None:
     match = _plzen_match()
     state = RoundGuiState(field_size=5_000)
     state.ensure_match(match.match_id)
-    state.money[str(match.match_id)] = {
-        "tipsport": {"home": 70, "draw": 15, "away": 15, "over": 50, "under": 50},
-        "fortuna": {"home": 75, "draw": 10, "away": 15, "over": 55, "under": 45},
-        "sazkabet": {"home": 72, "draw": 12, "away": 16, "over": 52, "under": 48},
-    }
+    apply_sample_crowd(state, match.match_id)
     contexts = build_match_sim_contexts((match,), state)
     agents = build_default_agents(contexts, lineup=None, state=None)
     calls: list[tuple[int, int]] = []
@@ -112,11 +105,7 @@ def test_build_default_agents_includes_pure_ev_joker_with_lineup() -> None:
     match = _plzen_match()
     state = RoundGuiState(field_size=5_000)
     state.ensure_match(match.match_id)
-    state.money[str(match.match_id)] = {
-        "tipsport": {"home": 70, "draw": 15, "away": 15, "over": 50, "under": 50},
-        "fortuna": {"home": 75, "draw": 10, "away": 15, "over": 55, "under": 45},
-        "sazkabet": {"home": 72, "draw": 12, "away": 16, "over": 52, "under": 48},
-    }
+    apply_sample_crowd(state, match.match_id)
     contexts = build_match_sim_contexts((match,), state)
     lineup = build_round_lineup(build_lineup_contexts((match,), state))
     agents = build_default_agents(contexts, lineup=lineup, state=None)
@@ -176,6 +165,49 @@ def test_vectorized_scoring_matches_score_round() -> None:
     assert total == expected
 
 
+def test_simulate_skips_matches_without_p_matrix() -> None:
+    from test_probability import _plzen_match
+
+    from megax.tipsport.offer import MatchOdds, MegaxMatch
+
+    playable = _plzen_match()
+    postponed = MegaxMatch(
+        match_id=999999,
+        name="Odložený - TBD",
+        home="Odložený",
+        away="TBD",
+        kickoff_at=playable.kickoff_at,
+        odds=MatchOdds(home=0.0, draw=0.0, away=0.0),
+        match_type="MATCH_POSTPONED",
+        ended=False,
+        competition_id=playable.competition_id,
+    )
+    state = RoundGuiState(field_size=5_000)
+    for match in (playable, postponed):
+        state.ensure_match(match.match_id)
+        apply_sample_crowd(state, match.match_id)
+    record = RoundRecord(
+        round_key="sim-skip-postponed",
+        state=state,
+        matches=(playable, postponed),
+        saved_at=datetime.now(timezone.utc),
+    )
+    result = simulate_round_record(
+        record,
+        sim_config=SimulationConfig(
+            universes=20,
+            field_size=5_000,
+            crowd_players=30,
+            seed=7,
+        ),
+        include_saved_agents=False,
+    )
+    assert result.skipped_match_ids == (postponed.match_id,)
+    assert len(result.matches) == 1
+    assert result.matches[0].match_id == playable.match_id
+    assert result.agents
+
+
 def test_load_and_simulate_missing_round() -> None:
     from megax.simulate import load_and_simulate
 
@@ -190,6 +222,8 @@ def test_simulate_optimizer_uses_calibrated_knobs() -> None:
     record = load_round_record("2026-07-24_2026-07-27")
     if record is None or record.state.calibration is None:
         pytest.skip("Round snapshot with calibration required")
+    if not record.state.crowd_cells:
+        pytest.skip("Round snapshot needs crowd_cells for sparse C model")
 
     calibrated = build_lineup_for_knobs(
         record.matches,
@@ -222,11 +256,7 @@ def test_format_simulation_report_includes_tips(tmp_path, monkeypatch) -> None:
     match = _plzen_match()
     state = RoundGuiState(field_size=5_000)
     state.ensure_match(match.match_id)
-    state.money[str(match.match_id)] = {
-        "tipsport": {"home": 70, "draw": 15, "away": 15, "over": 50, "under": 50},
-        "fortuna": {"home": 75, "draw": 10, "away": 15, "over": 55, "under": 45},
-        "sazkabet": {"home": 72, "draw": 12, "away": 16, "over": 52, "under": 48},
-    }
+    apply_sample_crowd(state, match.match_id)
     record = RoundRecord(
         round_key="report-sim",
         state=state,

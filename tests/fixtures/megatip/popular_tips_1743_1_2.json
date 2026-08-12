@@ -1,0 +1,16 @@
+{
+  "message": "Nejtipovanější výsledky:",
+  "firstPopularTip": {
+    "value": "1:2",
+    "percentage": 32,
+    "tippedByClient": true
+  },
+  "secondPopularTip": {
+    "value": "1:3",
+    "percentage": 24
+  },
+  "thirdPopularTip": {
+    "value": "0:2",
+    "percentage": 16
+  }
+}

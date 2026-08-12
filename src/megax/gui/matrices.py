@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from html import escape
 
+from megax.crowd_observed import CROWD_GRID_SIZE, P_ZERO_THRESHOLD
 from megax.ev import expected_points
 from megax.utility import MIN_CROWD_SHARE, utility_score
 
@@ -56,27 +57,132 @@ def build_utility_grid(
     *,
     alpha: float,
     max_goals: int = 5,
+    known: tuple[tuple[bool, ...], ...] | None = None,
 ) -> tuple[tuple[float | None, ...], ...]:
     """GPP utility U(T)=EV(T)/C(T)^α for each tip score in the visible grid."""
     ev_grid = build_ev_grid(prob, max_goals=max_goals)
     window, size = _matrix_window(crowd, max_goals=max_goals)
+    known_window = None
+    if known is not None:
+        known_window, _ = _matrix_window(known, max_goals=max_goals)
     rows: list[tuple[float | None, ...]] = []
     for tip_home in range(size):
         row: list[float | None] = []
         for tip_away in range(size):
             share = window[tip_home][tip_away]
-            if share <= 0.0:
+            if known_window is not None:
+                if not known_window[tip_home][tip_away]:
+                    row.append(None)
+                    continue
+                if share <= 0.0:
+                    ev = ev_grid[tip_home][tip_away]
+                    if ev <= 0:
+                        row.append(None)
+                    else:
+                        row.append(utility_score(ev, MIN_CROWD_SHARE, alpha=alpha))
+                    continue
+            elif share <= 0.0:
                 row.append(None)
-            else:
-                row.append(
-                    utility_score(
-                        ev_grid[tip_home][tip_away],
-                        max(share, MIN_CROWD_SHARE),
-                        alpha=alpha,
-                    )
+                continue
+            row.append(
+                utility_score(
+                    ev_grid[tip_home][tip_away],
+                    max(share, MIN_CROWD_SHARE),
+                    alpha=alpha,
                 )
+            )
         rows.append(tuple(row))
     return tuple(rows)
+
+
+def render_editable_crowd_grid(
+    match_id: int,
+    cells: dict[str, float],
+    *,
+    grid_size: int = CROWD_GRID_SIZE,
+    api_top3: dict[str, int] | None = None,
+    prob: tuple[tuple[float, ...], ...] | None = None,
+    estimated_cells: dict[str, float] | None = None,
+    show_reset: bool = False,
+) -> str:
+    """Editable 6×6 crowd % grid — zadané (modře) vs dopočtené (zeleně)."""
+    api_top3 = api_top3 or {}
+    estimated_cells = estimated_cells or {}
+    match_key = str(match_id)
+    grid_size = min(grid_size, CROWD_GRID_SIZE)
+    header = "".join(f"<th>{j}</th>" for j in range(grid_size))
+    body_rows: list[str] = []
+    for home in range(grid_size):
+        cells_html: list[str] = []
+        for away in range(grid_size):
+            cell_key = f"{home}_{away}"
+            label = f"{home}:{away}"
+            field = f"crowd_{match_key}_{home}_{away}"
+            p_hint = ""
+            if prob is not None and home < len(prob) and away < len(prob[home]):
+                if prob[home][away] < P_ZERO_THRESHOLD:
+                    p_hint = ' title="P&lt;1% — lze 0%"'
+
+            if cell_key in cells:
+                val = cells[cell_key]
+                css = "crowd-cell-zero" if val == 0 else "crowd-cell-entered"
+                cells_html.append(
+                    f'<td class="{css}">'
+                    f'<input type="text" name="{escape(field)}" value="{escape(f"{val:g}")}" '
+                    f'style="width:2.8em;text-align:center;" inputmode="decimal"'
+                    f'{p_hint}></td>'
+                )
+            elif cell_key in estimated_cells:
+                est = estimated_cells[cell_key]
+                cells_html.append(
+                    f'<td class="crowd-cell-computed">'
+                    f'<div class="crowd-computed-val">{est:.1f}%</div>'
+                    f'<input type="text" name="{escape(field)}" value="" '
+                    f'placeholder="+" style="width:2.2em;text-align:center;" inputmode="decimal" '
+                    f'title="Dopočteno z P — zadejte pro přepsání"{p_hint}></td>'
+                )
+            else:
+                api_hint = ""
+                if label in api_top3:
+                    api_hint = f' placeholder="{api_top3[label]}" title="API top-3"'
+                cells_html.append(
+                    f'<td class="crowd-cell-empty">'
+                    f'<input type="text" name="{escape(field)}" value="" '
+                    f'style="width:2.8em;text-align:center;" inputmode="decimal"'
+                    f'{api_hint}{p_hint}></td>'
+                )
+        body_rows.append(f"<tr><th>{home}</th>{''.join(cells_html)}</tr>")
+
+    known = len(cells)
+    total = sum(cells.values())
+    est_count = len(estimated_cells)
+    est_sum = sum(estimated_cells.values())
+    est_note = f" · {est_count} dopočtených ({est_sum:.1f}%)" if est_count else ""
+    reset_btn = ""
+    if show_reset and api_top3:
+        reset_btn = (
+            f'<button type="submit" class="secondary" formaction="/reset-crowd-match" '
+            f'name="reset_match_id" value="{match_id}" style="font-size:.72rem;padding:.2rem .45rem;">'
+            f"Reset C (top-3)</button>"
+        )
+    return f"""
+    <div class="mx-wrap">
+      <div class="mx-title-row">
+        <div class="mx-title">C(x,y) — tipy davu (%)</div>
+        {reset_btn}
+      </div>
+      <div class="mx-sub">{known} zadaných · součet {total:.1f}%{est_note} · 0–{grid_size - 1} gólů</div>
+      <table class="mx-table crowd-edit">
+        <thead><tr><th></th>{header}</tr></thead>
+        <tbody>{"".join(body_rows)}</tbody>
+      </table>
+      <div class="mx-legend">
+        <span class="crowd-legend-entered">■ zadané</span> (API top-3 nebo ručně) ·
+        <span class="crowd-legend-computed">■ dopočtené</span> =
+        (100% − zadané) × P / ΣP mimo zadané. Uloží se jen vyplněná pole.
+      </div>
+    </div>
+    """
 
 
 def render_matrix_table(

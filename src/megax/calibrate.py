@@ -8,7 +8,8 @@ from datetime import datetime, timezone
 from itertools import product
 
 from megax.config import MegaxConfig, load_config
-from megax.crowd import CrowdMatrixResult, build_crowd_matrix
+from megax.crowd import CrowdMatrixResult
+from megax.crowd_observed import CROWD_GRID_SIZE, build_crowd_matrix_from_observed
 from megax.lineup import RoundLineup, build_round_lineup, leverage_count_for_round
 from megax.probability import ScoreMatrixResult, build_score_matrix_from_match
 from megax.simulate import (
@@ -91,14 +92,11 @@ def build_match_pc_cache(
         prob = build_score_matrix_from_match(match)
         if prob is None:
             continue
-        crowd = build_crowd_matrix(
-            prob,
-            state.money[str(match.match_id)],
-            blend_to_p=cfg.crowd_blend_to_p,
-            tail_gamma=cfg.crowd_tail_gamma,
-            zero_zero_delta=cfg.crowd_zero_zero_delta,
-            prelec_alpha=cfg.crowd_prelec_alpha,
-            zero_zero_min=cfg.crowd_zero_zero_min,
+        crowd = build_crowd_matrix_from_observed(
+            state.crowd_cells_for_match(match.match_id),
+            grid_size=CROWD_GRID_SIZE,
+            prob=prob,
+            top3_keys=state.top3_cell_keys(match.match_id),
         )
         cache.append(
             MatchPCCache(
@@ -254,8 +252,8 @@ def run_calibration(
     cfg = config or load_config()
     sim_cfg = sim_config or SimulationConfig(field_size=record.state.field_size)
     pc_cache = build_match_pc_cache(record.matches, record.state, config=cfg)
-    if len(pc_cache) != len(record.matches):
-        raise ValueError("Missing probability/crowd data for one or more matches")
+    if not pc_cache:
+        raise ValueError("Žádný zápas s maticí P — kalibraci nelze spustit.")
 
     knob_grid = grid or default_knob_grid(len(pc_cache))
     rows: list[CalibrationRow] = []
@@ -387,19 +385,17 @@ def format_calibration_report(result: CalibrationResult) -> str:
     return "\n".join(lines)
 
 
-def gui_simulation_config(field_size: int) -> SimulationConfig:
-    """Default simulate settings for GUI calibration (quick, reproducible)."""
+def gui_calibration_config(field_size: int) -> SimulationConfig:
+    """Simulate settings for grid-search calibration."""
     import os
 
-    universes = int(os.getenv("MEGAX_CALIBRATE_UNIVERSES", "1500"))
-    crowd_players = int(os.getenv("MEGAX_CALIBRATE_CROWD_PLAYERS", "400"))
-    seed_raw = os.getenv("MEGAX_CALIBRATE_SEED", "42")
-    seed = int(seed_raw) if seed_raw.strip() else 42
-    return SimulationConfig(
-        universes=universes,
-        field_size=field_size,
-        crowd_players=crowd_players,
-        seed=seed,
+    from megax.simulate import gui_simulation_config
+
+    return gui_simulation_config(
+        field_size,
+        universes=int(os.getenv("MEGAX_CALIBRATE_UNIVERSES", "1500")),
+        crowd_players=int(os.getenv("MEGAX_CALIBRATE_CROWD_PLAYERS", "400")),
+        seed=int(os.getenv("MEGAX_CALIBRATE_SEED", "42") or "42"),
     )
 
 

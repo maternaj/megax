@@ -11,8 +11,11 @@ from datetime import datetime, time as dt_time, timezone
 from itertools import product
 from typing import Any, Callable
 
-from megax.config import load_config
+from megax.bookmaker.errors import BookmakerAuthError
+from megax.config import bookmaker_client, load_config
 from megax.ingest import fetch_round_snapshot
+from megax.megatip import build_observed_coverage
+from megax.megatip.api import megatip_api_from_client, resolve_round_id
 from megax.poll import poll_once, poll_until_all_finished
 from megax.calibrate import (
     CalibrationKnobs,
@@ -106,6 +109,107 @@ def _round_to_dict(snapshot) -> dict[str, Any]:
             for slot in snapshot.slots
         ],
     }
+
+
+def _crowd_snapshot_to_dict(snapshot) -> dict[str, Any]:
+    return {
+        "round_id": snapshot.round_id,
+        "contest_id": snapshot.contest_id,
+        "fetched_at": _iso(snapshot.fetched_at),
+        "matches": [
+            {
+                "match_id": match.match_id,
+                "round_match_id": match.round_match_id,
+                "top3": match.tips,
+                "probed": match.probed,
+                "inferred": match.inferred,
+                "is_floor": match.is_floor,
+                "failed_probes": list(match.failed_probes),
+            }
+            for match in snapshot.matches
+        ],
+    }
+
+
+def cmd_fetch_crowd(args: argparse.Namespace) -> int:
+    config = load_config()
+    brand = args.brand
+    client = bookmaker_client(config, brand)
+    api = megatip_api_from_client(
+        client,
+        contest_id=config.megatip_contest_id,
+        tile_id=config.megatip_tile_id,
+        serie_id=config.megatip_serie_id,
+    )
+    try:
+        round_id = args.round_id
+        if round_id is None and args.round_number is not None:
+            round_id = resolve_round_id(
+                api,
+                args.round_number,
+                offset=config.megatip_round_id_offset,
+            )
+
+        if args.probe:
+            candidates = {}
+            if args.probe_match_id and args.probe_score:
+                if len(args.probe_match_id) != len(args.probe_score):
+                    raise SystemExit("--probe-match-id and --probe-score must have the same count")
+                for match_id, score in zip(args.probe_match_id, args.probe_score, strict=True):
+                    if ":" not in score:
+                        raise SystemExit(f"Invalid probe score (expected H:A): {score}")
+                    home_s, away_s = score.split(":", 1)
+                    candidates.setdefault(match_id, []).append((int(home_s), int(away_s)))
+            snapshot = build_observed_coverage(
+                api,
+                round_id=round_id,
+                candidates_by_match=candidates or None,
+                only_open=not args.include_finished,
+                max_score=config.megatip_max_score,
+                probe_delay_sec=config.megatip_probe_delay_sec,
+            )
+            if snapshot is None:
+                raise SystemExit("Failed to fetch crowd data (check login credentials and round id)")
+            payload = _crowd_snapshot_to_dict(snapshot)
+        else:
+            round_tips = api.fetch_round_tips(round_id)
+            if round_tips is None:
+                raise SystemExit("Failed to fetch round tips (check login credentials and round id)")
+            payload = {
+                "round_id": round_id,
+                "contest_id": round_tips.contest_id,
+                "can_tip": round_tips.can_tip,
+                "matches": [
+                    {
+                        "match_id": match.match_id,
+                        "round_match_id": match.round_match_id,
+                        "match_name": match.match_name,
+                        "status": match.status,
+                        "kickoff_at": _iso(match.kickoff_at),
+                        "top3": match.popular_tips.as_dict() if match.popular_tips else {},
+                    }
+                    for match in round_tips.round_matches
+                ],
+                "client_tips": [
+                    {
+                        "round_match_id": tip.round_match_id,
+                        "score": f"{tip.home}:{tip.away}",
+                        "joker_used": tip.joker_used,
+                    }
+                    for tip in round_tips.client_tips
+                ],
+            }
+    except BookmakerAuthError as exc:
+        raise SystemExit(str(exc)) from exc
+
+    text = json.dumps(payload, ensure_ascii=False, indent=2)
+    if args.output:
+        with open(args.output, "w", encoding="utf-8") as fh:
+            fh.write(text)
+            fh.write("\n")
+    else:
+        print(text)
+    return 0
 
 
 def cmd_fetch_round(args: argparse.Namespace) -> int:
@@ -381,6 +485,43 @@ def build_parser() -> argparse.ArgumentParser:
     calibrate.add_argument("-o", "--output")
     calibrate.set_defaults(func=cmd_calibrate)
 
+    crowd = sub.add_parser("fetch-crowd", help="Fetch Megatipovačka crowd tips (top-3 + optional probes)")
+    crowd.add_argument(
+        "--brand",
+        choices=("tipsport", "chance"),
+        default="chance",
+        help="Bookmaker account/session to use",
+    )
+    crowd.add_argument("--round-id", type=int, help="Megatip API roundId (e.g. 383 for round 3)")
+    crowd.add_argument(
+        "--round-number",
+        type=int,
+        help="1-based round number (converted via 380+N → roundId)",
+    )
+    crowd.add_argument(
+        "--probe",
+        action="store_true",
+        help="Probe additional scores via popular-tips API (Tier B)",
+    )
+    crowd.add_argument(
+        "--probe-match-id",
+        type=int,
+        action="append",
+        help="Tipsport match_id to probe (repeatable, pairs with --probe-score)",
+    )
+    crowd.add_argument(
+        "--probe-score",
+        action="append",
+        help='Exact score to probe, e.g. "1:0" (repeatable)',
+    )
+    crowd.add_argument(
+        "--include-finished",
+        action="store_true",
+        help="Include finished matches when probing",
+    )
+    crowd.add_argument("-o", "--output")
+    crowd.set_defaults(func=cmd_fetch_crowd)
+
     return parser
 
 
@@ -394,6 +535,10 @@ def main(argv: list[str] | None = None) -> int:
         has_dt = args.from_date and args.to_date
         if not has_day and not has_dt:
             parser.error("fetch-round requires --from-date/--to-date or --from-day/--to-day")
+
+    if args.command == "fetch-crowd":
+        if args.round_id is None and args.round_number is None:
+            parser.error("fetch-crowd requires --round-id or --round-number")
 
     if args.command == "calibrate" and args.field is None:
         record = load_round_record(args.round)

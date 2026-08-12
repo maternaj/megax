@@ -1,0 +1,118 @@
+{
+  "contestTileId": 3575,
+  "contestId": 161,
+  "tipovackaId": 161,
+  "anotherChanceAvailable": false,
+  "availableLimitsCount": 0,
+  "type": "MEGATIPOVACKA",
+  "state": "PLAYING",
+  "subState": "ACCOMPLISHED",
+  "clientIsDropOut": false,
+  "name": "Megatipovačka o 125 milionů",
+  "imageUrl": "https://minshara.tipsport.org/library/img_orig/60997.jpg",
+  "label": "Megatipovačka",
+  "turnamentTree": false,
+  "rows": [
+    {
+      "title": "Zatím vyhráváte",
+      "values": [
+        {
+          "value": "0 G"
+        }
+      ]
+    },
+    {
+      "title": "Mé aktuální pořadí / Hráčů celkem",
+      "values": [
+        {
+          "color": "GREEN",
+          "value": "50 234"
+        },
+        {
+          "value": "130 074"
+        }
+      ]
+    },
+    {
+      "title": "Můj počet bodů",
+      "values": [
+        {
+          "value": "54"
+        }
+      ]
+    },
+    {
+      "title": "Začátek nejbližšího (nenatipovaného) zápasu",
+      "values": [
+        {
+          "value": "15. 8. 2026 17:00"
+        }
+      ]
+    },
+    {
+      "title": "Aktuální kolo / Celkový počet kol",
+      "values": [
+        {
+          "value": 3
+        },
+        {
+          "value": 18
+        }
+      ]
+    },
+    {
+      "title": "Celková měsíční dotace",
+      "values": [
+        {
+          "value": "39 000 000 G"
+        }
+      ]
+    }
+  ],
+  "button": {
+    "title": "VYBRAT TÝM",
+    "type": "TEAM_LIST",
+    "liveMatchId": 0,
+    "showNotificationWillBeSend": false,
+    "active": true
+  },
+  "ruleArticleId": "megatipovacka-pravidla",
+  "faqArticleId": "megatipovacka-faq",
+  "aboutContestArticleId": "megatipovacka-about",
+  "megatipovacka": {
+    "competitionList": [
+      {
+        "competitionId": 161,
+        "competitionName": "Megatipovačka o 125 milionů",
+        "mainCompetition": true
+      },
+      {
+        "competitionId": 162,
+        "competitionName": "Fanouškovská",
+        "mainCompetition": false
+      }
+    ],
+    "seriesListName": "Období",
+    "serieList": [
+      {
+        "serieName": "Celkem",
+        "canShow": true,
+        "actualSerie": false
+      },
+      {
+        "serieId": 141,
+        "serieName": "Podzim",
+        "canShow": true,
+        "actualSerie": true
+      },
+      {
+        "serieId": 142,
+        "serieName": "Jaro",
+        "canShow": false,
+        "actualSerie": false
+      }
+    ]
+  },
+  "showInfo": false,
+  "vip": false
+}
